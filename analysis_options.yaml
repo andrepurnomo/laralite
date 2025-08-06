@@ -1,0 +1,12 @@
+analyzer:
+  errors:
+    file_names: ignore
+include: package:flutter_lints/flutter.yaml
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options
+
+linter:
+  rules:
+    # Skip warning for print statements in test files
+    avoid_print: false
