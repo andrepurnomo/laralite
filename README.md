@@ -165,9 +165,12 @@ await Schema.create('posts', (table) {
   table.id();
   table.string('title');
   table.text('content').nullable();
-  table.foreignId('user_id').references('id').on('users');
+  table.foreignId('user_id');
   table.dateTime('published_at').nullable();
   table.timestamps();
+  
+  // Foreign key constraint
+  table.foreign('user_id', 'users.id');
 });
 ```
 
@@ -182,10 +185,16 @@ final user = User()
 
 await user.save();
 
-// Query users
+// Query users (both patterns work after code generation)
 final users = await User().query()
   .where('age', '>', 18)
   .orderBy('name')
+  .get();
+
+// Alternative static method pattern
+final usersStatic = await Model.query<User>(() => User())
+  .where('age', '>', 18)
+  .orderBy('name') 
   .get();
 
 // Find user by ID (static method)
@@ -198,7 +207,7 @@ final userWithPosts = await User().query()
   .first();
 
 // Get all users
-final allUsers = await User().query().get();
+final allUsers = await Model.all<User>(() => User());
 
 // Complex queries with relationships
 final activeAdults = await User().query()
@@ -380,7 +389,7 @@ final user = await Model.findOrFail<User>(1, () => User());
 final users = await Model.findMany<User>([1, 2, 3], () => User());
 
 // Create multiple records
-final users = await User.createMany(() => User(), [
+final users = await Model.createMany<User>(() => User(), [
   {'name': 'Alice', 'email': 'alice@example.com', 'age': 25},
   {'name': 'Bob', 'email': 'bob@example.com', 'age': 30},
 ]);
