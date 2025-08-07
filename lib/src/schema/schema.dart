@@ -19,10 +19,36 @@ import 'blueprint.dart';
 class Schema {
   /// Create a new table
   static Future<void> create(String tableName, Function(Blueprint) callback) async {
+    // Check if table already exists
+    if (await hasTable(tableName)) {
+      return; // Table already exists, skip creation
+    }
+    
     final blueprint = Blueprint(tableName, isCreating: true);
     callback(blueprint);
     
     final sql = blueprint.toSql();
+    await Database.execute(sql);
+    
+    // Execute any additional statements (indexes, etc.)
+    for (final statement in blueprint.additionalStatements) {
+      try {
+        await Database.execute(statement);
+      } catch (e) {
+        // Ignore index already exists errors
+        if (!e.toString().contains('already exists')) {
+          rethrow;
+        }
+      }
+    }
+  }
+  
+  /// Create a new table with IF NOT EXISTS syntax
+  static Future<void> createIfNotExists(String tableName, Function(Blueprint) callback) async {
+    final blueprint = Blueprint(tableName, isCreating: true);
+    callback(blueprint);
+    
+    final sql = blueprint.toSqlIfNotExists();
     await Database.execute(sql);
     
     // Execute any additional statements (indexes, etc.)

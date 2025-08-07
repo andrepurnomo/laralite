@@ -181,6 +181,28 @@ CREATE TABLE $tableName (
     return sql;
   }
   
+  /// Generate CREATE TABLE IF NOT EXISTS SQL
+  String toSqlIfNotExists() {
+    if (!isCreating) {
+      throw StateError('toSqlIfNotExists() can only be called for table creation');
+    }
+    
+    final columnDefs = _columns.map((col) => col.toSql()).toList();
+    
+    // Add foreign key constraints
+    columnDefs.addAll(_foreignKeys);
+    
+    final sql = '''
+CREATE TABLE IF NOT EXISTS $tableName (
+  ${columnDefs.join(',\n  ')}
+)''';
+    
+    // Add indexes to additional statements
+    additionalStatements.addAll(_indexes);
+    
+    return sql;
+  }
+  
   /// Generate ALTER TABLE statements for SQLite
   List<String> toAlterStatements() {
     final statements = <String>[];
