@@ -1,5 +1,6 @@
 import '../fields/field.dart';
 import '../fields/datetime_fields.dart';
+import '../fields/numeric_fields.dart';
 import '../database/database.dart';
 import 'relationships.dart';
 import '../query/query_builder.dart';
@@ -278,10 +279,13 @@ abstract class Model<T extends Model<T>> {
       );
       
       if (result > 0) {
-        // Get the last inserted ID for auto-increment primary keys
-        final rows = await Database.query('SELECT last_insert_rowid() as id');
-        if (rows.isNotEmpty) {
-          primaryKeyValue = rows.first['id'];
+        // Only set last_insert_rowid when primary key is auto-increment integer and wasn't provided
+        final pkField = _fields[primaryKey];
+        if (_primaryKeyValue == null && pkField is AutoIncrementField) {
+          final rows = await Database.query('SELECT last_insert_rowid() as id');
+          if (rows.isNotEmpty) {
+            primaryKeyValue = rows.first['id'];
+          }
         }
         
         markAsExisting();
