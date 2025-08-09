@@ -6,44 +6,46 @@ import '../database/database.dart';
 class QueryBuilder<T extends Model<T>> {
   /// The model constructor function
   final T Function() _modelConstructor;
-  
+
   /// The model instance for table information
   final T _modelInstance;
-  
+
   /// WHERE clause conditions
   final List<WhereCondition> _whereConditions = [];
-  
+
   /// Boolean logic for WHERE clauses (AND/OR)
   final List<String> _whereBooleans = [];
-  
+
   /// ORDER BY clauses
   final List<OrderClause> _orderClauses = [];
-  
+
   /// LIMIT value
   int? _limit;
-  
+
   /// OFFSET value
   int? _offset;
-  
+
   /// SELECT columns (defaults to all columns)
   List<String>? _selectColumns;
-  
+
   /// Relationships to eager load
   final List<String> _includes = [];
-  
+
   /// Constructor
   QueryBuilder(this._modelConstructor) : _modelInstance = _modelConstructor();
-  
+
   /// Get the table name
   String get table => _modelInstance.table;
-  
+
   /// Add a WHERE condition
   QueryBuilder<T> where(String column, dynamic operator, [dynamic value]) {
     if (value == null) {
       // If only two arguments, treat operator as value with '=' operator
       _whereConditions.add(BasicWhereCondition(column, '=', operator));
     } else {
-      _whereConditions.add(BasicWhereCondition(column, operator.toString(), value));
+      _whereConditions.add(
+        BasicWhereCondition(column, operator.toString(), value),
+      );
     }
     _whereBooleans.add('AND');
     return this;
@@ -55,40 +57,42 @@ class QueryBuilder<T extends Model<T>> {
       // If only two arguments, treat operator as value with '=' operator
       _whereConditions.add(BasicWhereCondition(column, '=', operator));
     } else {
-      _whereConditions.add(BasicWhereCondition(column, operator.toString(), value));
+      _whereConditions.add(
+        BasicWhereCondition(column, operator.toString(), value),
+      );
     }
     _whereBooleans.add('OR');
     return this;
   }
-  
+
   /// Add a WHERE IN condition
   QueryBuilder<T> whereIn(String column, List<dynamic> values) {
     _whereConditions.add(WhereInCondition(column, values));
     _whereBooleans.add('AND');
     return this;
   }
-  
+
   /// Add a WHERE NOT IN condition
   QueryBuilder<T> whereNotIn(String column, List<dynamic> values) {
     _whereConditions.add(WhereNotInCondition(column, values));
     _whereBooleans.add('AND');
     return this;
   }
-  
+
   /// Add a WHERE NULL condition
   QueryBuilder<T> whereNull(String column) {
     _whereConditions.add(WhereNullCondition(column, true));
     _whereBooleans.add('AND');
     return this;
   }
-  
+
   /// Add a WHERE NOT NULL condition
   QueryBuilder<T> whereNotNull(String column) {
     _whereConditions.add(WhereNullCondition(column, false));
     _whereBooleans.add('AND');
     return this;
   }
-  
+
   /// Add a WHERE BETWEEN condition
   QueryBuilder<T> whereBetween(String column, dynamic min, dynamic max) {
     _whereConditions.add(WhereBetweenCondition(column, min, max));
@@ -147,7 +151,7 @@ class QueryBuilder<T extends Model<T>> {
       callback,
       exists: true,
     );
-    
+
     _whereConditions.add(existsCondition);
     _whereBooleans.add('AND');
     return this;
@@ -169,7 +173,7 @@ class QueryBuilder<T extends Model<T>> {
       callback,
       exists: false,
     );
-    
+
     _whereConditions.add(existsCondition);
     _whereBooleans.add('AND');
     return this;
@@ -191,7 +195,7 @@ class QueryBuilder<T extends Model<T>> {
       callback,
       exists: true,
     );
-    
+
     _whereConditions.add(existsCondition);
     _whereBooleans.add('OR');
     return this;
@@ -213,7 +217,7 @@ class QueryBuilder<T extends Model<T>> {
       callback,
       exists: false,
     );
-    
+
     _whereConditions.add(existsCondition);
     _whereBooleans.add('OR');
     return this;
@@ -238,7 +242,7 @@ class QueryBuilder<T extends Model<T>> {
       count,
       callback,
     );
-    
+
     _whereConditions.add(countCondition);
     _whereBooleans.add('AND');
     return this;
@@ -248,18 +252,20 @@ class QueryBuilder<T extends Model<T>> {
   QueryBuilder<T> withTrashed() {
     // Remove any existing soft delete scopes by setting a flag
     _includesTrashed = true;
-    
+
     // Remove any existing null conditions for deleted_at column
     final modelInstance = _modelConstructor();
     if (modelInstance is SoftDeletesMixin) {
-      final deletedAtColumn = (modelInstance as SoftDeletesMixin).deletedAtColumn;
-      _whereConditions.removeWhere((condition) => 
-        condition is WhereNullCondition && 
-        condition.column == deletedAtColumn && 
-        condition.isNull == true
+      final deletedAtColumn =
+          (modelInstance as SoftDeletesMixin).deletedAtColumn;
+      _whereConditions.removeWhere(
+        (condition) =>
+            condition is WhereNullCondition &&
+            condition.column == deletedAtColumn &&
+            condition.isNull == true,
       );
     }
-    
+
     return this;
   }
 
@@ -273,7 +279,7 @@ class QueryBuilder<T extends Model<T>> {
   /// Restore soft deleted records matching query conditions
   Future<int> restore() async {
     final instance = _modelConstructor();
-    
+
     // Check if model supports soft deletes
     final softDeleteColumn = _getSoftDeleteColumn();
     if (softDeleteColumn == null) {
@@ -283,141 +289,143 @@ class QueryBuilder<T extends Model<T>> {
     // Build the WHERE clause for existing conditions
     String whereClause = '';
     List<dynamic> parameters = [];
-    
+
     if (_whereConditions.isNotEmpty) {
-      whereClause = 'WHERE ${_buildWhereClause()} AND $softDeleteColumn IS NOT NULL';
+      whereClause =
+          'WHERE ${_buildWhereClause()} AND $softDeleteColumn IS NOT NULL';
       parameters = _getParameters();
     } else {
       whereClause = 'WHERE $softDeleteColumn IS NOT NULL';
     }
 
-    final sql = 'UPDATE ${instance.table} SET $softDeleteColumn = NULL $whereClause';
-    
+    final sql =
+        'UPDATE ${instance.table} SET $softDeleteColumn = NULL $whereClause';
+
     return await Database.execute(sql, parameters);
   }
 
   /// Force delete records matching query conditions (permanent delete)
   Future<int> forceDelete() async {
     final instance = _modelConstructor();
-    
+
     // Build the WHERE clause for existing conditions
     String whereClause = '';
     List<dynamic> parameters = [];
-    
+
     if (_whereConditions.isNotEmpty) {
       whereClause = 'WHERE ${_buildWhereClause()}';
       parameters = _getParameters();
     }
 
     final sql = 'DELETE FROM ${instance.table} $whereClause';
-    
+
     return await Database.execute(sql, parameters);
   }
 
   /// Get soft delete column name if model supports soft deletes
   String? _getSoftDeleteColumn() {
     final instance = _modelConstructor();
-    
+
     // Check if model has SoftDeletesMixin
     if (instance.toString().contains('SoftDeletes')) {
       return 'deleted_at'; // Default soft delete column
     }
-    
+
     return null;
   }
 
   // Private flags for soft delete handling
   bool _includesTrashed = false;
   bool _onlyTrashed = false;
-  
+
   /// Get whether query includes trashed records
   bool get includesTrashed => _includesTrashed;
-  
+
   /// Add an ORDER BY clause
   QueryBuilder<T> orderBy(String column, [String direction = 'ASC']) {
     _orderClauses.add(OrderClause(column, direction.toUpperCase()));
     return this;
   }
-  
+
   /// Add ORDER BY ASC
   QueryBuilder<T> orderByAsc(String column) {
     return orderBy(column, 'ASC');
   }
-  
+
   /// Add ORDER BY DESC
   QueryBuilder<T> orderByDesc(String column) {
     return orderBy(column, 'DESC');
   }
-  
+
   /// Set LIMIT
   QueryBuilder<T> limit(int count) {
     _limit = count;
     return this;
   }
-  
+
   /// Set OFFSET
   QueryBuilder<T> offset(int count) {
     _offset = count;
     return this;
   }
-  
+
   /// Take only a specific number of records (alias for limit)
   QueryBuilder<T> take(int count) {
     return limit(count);
   }
-  
+
   /// Skip a specific number of records (alias for offset)
   QueryBuilder<T> skip(int count) {
     return offset(count);
   }
-  
+
   /// Select specific columns
   QueryBuilder<T> select(List<String> columns) {
     _selectColumns = columns;
     return this;
   }
-  
+
   /// Build the SQL query
   String _buildQuery() {
     final selectClause = _selectColumns?.join(', ') ?? '*';
     var query = 'SELECT $selectClause FROM $table';
-    
+
     // Build WHERE conditions including soft delete handling
     final whereConditions = <String>[];
     final allParameters = <dynamic>[];
-    
+
     // Add existing WHERE conditions
     if (_whereConditions.isNotEmpty) {
       whereConditions.add(_buildWhereClause());
       allParameters.addAll(_getParameters());
     }
-    
+
     // Add soft delete conditions if applicable
     final softDeleteClause = _buildSoftDeleteClause();
     if (softDeleteClause.isNotEmpty) {
       whereConditions.add(softDeleteClause);
     }
-    
+
     if (whereConditions.isNotEmpty) {
       query += ' WHERE ${whereConditions.join(' AND ')}';
     }
-    
+
     // Add ORDER BY
     if (_orderClauses.isNotEmpty) {
       final orderClause = _orderClauses.map((c) => c.toSql()).join(', ');
       query += ' ORDER BY $orderClause';
     }
-    
+
     // Add LIMIT
     if (_limit != null) {
       query += ' LIMIT $_limit';
     }
-    
+
     // Add OFFSET
     if (_offset != null) {
       query += ' OFFSET $_offset';
     }
-    
+
     return query;
   }
 
@@ -436,11 +444,11 @@ class QueryBuilder<T extends Model<T>> {
       return '$softDeleteColumn IS NULL'; // Default: exclude soft deleted
     }
   }
-  
+
   /// Build WHERE clause with AND/OR logic
   String _buildWhereClause() {
     if (_whereConditions.isEmpty) return '';
-    
+
     final parts = <String>[];
     for (int i = 0; i < _whereConditions.length; i++) {
       final condition = _whereConditions[i];
@@ -462,13 +470,13 @@ class QueryBuilder<T extends Model<T>> {
     }
     return parameters;
   }
-  
+
   /// Execute query and return all results
   Future<List<T>> get() async {
     final query = _buildQuery();
     final parameters = _getParameters();
     final rows = await Database.query(query, parameters);
-    
+
     final models = rows.map((row) {
       final model = _modelConstructor();
       model.fromMap(row);
@@ -479,30 +487,30 @@ class QueryBuilder<T extends Model<T>> {
     if (_includes.isNotEmpty && models.isNotEmpty) {
       await _loadEagerRelationships(models);
     }
-    
+
     return models;
   }
-  
+
   /// Execute query and return first result
   Future<T?> first() async {
     final results = await limit(1).get();
     return results.isNotEmpty ? results.first : null;
   }
-  
+
   /// Execute query and return count
   Future<int> count() async {
     final originalSelect = _selectColumns;
     _selectColumns = ['COUNT(*) as count'];
-    
+
     final query = _buildQuery();
     final parameters = _getParameters();
     final rows = await Database.query(query, parameters);
-    
+
     _selectColumns = originalSelect; // Restore original select
-    
+
     return rows.isNotEmpty ? rows.first['count'] as int : 0;
   }
-  
+
   /// Check if any records exist
   Future<bool> exists() async {
     final count = await this.count();
@@ -513,13 +521,13 @@ class QueryBuilder<T extends Model<T>> {
   Future<double?> sum(String column) async {
     final originalSelect = _selectColumns;
     _selectColumns = ['SUM($column) as sum'];
-    
+
     final query = _buildQuery();
     final parameters = _getParameters();
     final rows = await Database.query(query, parameters);
-    
+
     _selectColumns = originalSelect; // Restore original select
-    
+
     final result = rows.isNotEmpty ? rows.first['sum'] : null;
     return result != null ? (result as num).toDouble() : null;
   }
@@ -528,13 +536,13 @@ class QueryBuilder<T extends Model<T>> {
   Future<double?> avg(String column) async {
     final originalSelect = _selectColumns;
     _selectColumns = ['AVG($column) as avg'];
-    
+
     final query = _buildQuery();
     final parameters = _getParameters();
     final rows = await Database.query(query, parameters);
-    
+
     _selectColumns = originalSelect; // Restore original select
-    
+
     final result = rows.isNotEmpty ? rows.first['avg'] : null;
     return result != null ? (result as num).toDouble() : null;
   }
@@ -543,13 +551,13 @@ class QueryBuilder<T extends Model<T>> {
   Future<dynamic> max(String column) async {
     final originalSelect = _selectColumns;
     _selectColumns = ['MAX($column) as max'];
-    
+
     final query = _buildQuery();
     final parameters = _getParameters();
     final rows = await Database.query(query, parameters);
-    
+
     _selectColumns = originalSelect; // Restore original select
-    
+
     return rows.isNotEmpty ? rows.first['max'] : null;
   }
 
@@ -557,23 +565,26 @@ class QueryBuilder<T extends Model<T>> {
   Future<dynamic> min(String column) async {
     final originalSelect = _selectColumns;
     _selectColumns = ['MIN($column) as min'];
-    
+
     final query = _buildQuery();
     final parameters = _getParameters();
     final rows = await Database.query(query, parameters);
-    
+
     _selectColumns = originalSelect; // Restore original select
-    
+
     return rows.isNotEmpty ? rows.first['min'] : null;
   }
-  
+
   /// Apply a scope (callback function)
   QueryBuilder<T> scope(QueryBuilder<T> Function(QueryBuilder<T>) callback) {
     return callback(this);
   }
-  
+
   /// Apply conditional logic
-  QueryBuilder<T> when(bool condition, QueryBuilder<T> Function(QueryBuilder<T>) callback) {
+  QueryBuilder<T> when(
+    bool condition,
+    QueryBuilder<T> Function(QueryBuilder<T>) callback,
+  ) {
     if (condition) {
       return callback(this);
     }
@@ -598,10 +609,7 @@ class QueryBuilder<T extends Model<T>> {
   }
 
   /// Paginate results
-  Future<PaginationResult<T>> paginate({
-    int page = 1,
-    int perPage = 15,
-  }) async {
+  Future<PaginationResult<T>> paginate({int page = 1, int perPage = 15}) async {
     if (page < 1) page = 1;
     if (perPage < 1) perPage = 15;
 
@@ -627,10 +635,10 @@ class QueryBuilder<T extends Model<T>> {
       to: total > 0 ? offset + results.length : 0,
     );
   }
-  
+
   /// Get the SQL query string (for testing purposes)
   String toSql() => _buildQuery();
-  
+
   /// Get query parameters (for testing purposes)
   List<dynamic> getBindings() => _getParameters();
 
@@ -642,50 +650,77 @@ class QueryBuilder<T extends Model<T>> {
   }
 
   /// Load a specific relationship for models using dynamic relationship registry
-  Future<void> _loadRelationship(List<T> models, String relationshipName) async {
+  Future<void> _loadRelationship(
+    List<T> models,
+    String relationshipName,
+  ) async {
     if (models.isEmpty) return;
-    
+
     // Get relationship from the first model's registry
     final firstModel = models.first;
     final relationship = firstModel.relationships.get(relationshipName);
-    
+
     if (relationship == null) {
-      print('Warning: Unknown relationship "$relationshipName" for eager loading on ${firstModel.runtimeType}');
+      print(
+        'Warning: Unknown relationship "$relationshipName" for eager loading on ${firstModel.runtimeType}',
+      );
       return;
     }
-    
+
     // Load relationship data for all models at once (N+1 prevention)
     await _loadRelationshipBulk(models, relationshipName, relationship);
   }
-  
+
   /// Load relationship data in bulk to prevent N+1 queries
-  Future<void> _loadRelationshipBulk(List<T> models, String relationshipName, dynamic relationship) async {
+  Future<void> _loadRelationshipBulk(
+    List<T> models,
+    String relationshipName,
+    dynamic relationship,
+  ) async {
     // Get primary key values from all models
     final primaryKeys = models
         .map((model) => model.getValue(model.primaryKey))
         .where((id) => id != null)
         .toList();
-        
+
     if (primaryKeys.isEmpty) return;
-    
+
     // Determine relationship type and load accordingly
     final relationshipTypeName = relationship.runtimeType.toString();
-    
+
     if (relationshipTypeName.contains('HasOne')) {
       await _loadHasOneRelationshipBulk(models, relationshipName, relationship);
     } else if (relationshipTypeName.contains('HasMany')) {
-      await _loadHasManyRelationshipBulk(models, relationshipName, relationship);
+      await _loadHasManyRelationshipBulk(
+        models,
+        relationshipName,
+        relationship,
+      );
     } else if (relationshipTypeName.contains('BelongsTo')) {
-      await _loadBelongsToRelationshipBulk(models, relationshipName, relationship);
+      await _loadBelongsToRelationshipBulk(
+        models,
+        relationshipName,
+        relationship,
+      );
     } else if (relationshipTypeName.contains('BelongsToMany')) {
-      await _loadBelongsToManyRelationshipBulk(models, relationshipName, relationship);
+      await _loadBelongsToManyRelationshipBulk(
+        models,
+        relationshipName,
+        relationship,
+      );
     } else {
-      print('Warning: Unsupported relationship type "$relationshipTypeName" for eager loading');
+      print(
+        'Warning: Unsupported relationship type "$relationshipTypeName" for eager loading',
+      );
     }
   }
 
   /// Load hasOne relationship in bulk
-  Future<void> _loadHasOneRelationshipBulk(List<T> models, String relationshipName, dynamic relationship) async {
+  Future<void> _loadHasOneRelationshipBulk(
+    List<T> models,
+    String relationshipName,
+    dynamic relationship,
+  ) async {
     final primaryKeys = models
         .map((model) => model.getValue(model.primaryKey))
         .where((id) => id != null)
@@ -710,7 +745,7 @@ class QueryBuilder<T extends Model<T>> {
     for (final model in models) {
       final primaryKeyValue = model.getValue(model.primaryKey);
       final relatedData = relatedByForeignKey[primaryKeyValue];
-      
+
       if (relatedData != null) {
         final relatedModel = relationship.relatedConstructor();
         relatedModel.fromMap(relatedData);
@@ -720,7 +755,11 @@ class QueryBuilder<T extends Model<T>> {
   }
 
   /// Load hasMany relationship in bulk
-  Future<void> _loadHasManyRelationshipBulk(List<T> models, String relationshipName, dynamic relationship) async {
+  Future<void> _loadHasManyRelationshipBulk(
+    List<T> models,
+    String relationshipName,
+    dynamic relationship,
+  ) async {
     final primaryKeys = models
         .map((model) => model.getValue(model.primaryKey))
         .where((id) => id != null)
@@ -745,19 +784,23 @@ class QueryBuilder<T extends Model<T>> {
     for (final model in models) {
       final primaryKeyValue = model.getValue(model.primaryKey);
       final relatedDataList = relatedByForeignKey[primaryKeyValue] ?? [];
-      
+
       final relatedModels = relatedDataList.map((data) {
         final relatedModel = relationship.relatedConstructor();
         relatedModel.fromMap(data);
         return relatedModel;
       }).toList();
-      
+
       model.setValue('_eager_$relationshipName', relatedModels);
     }
   }
 
   /// Load belongsTo relationship in bulk
-  Future<void> _loadBelongsToRelationshipBulk(List<T> models, String relationshipName, dynamic relationship) async {
+  Future<void> _loadBelongsToRelationshipBulk(
+    List<T> models,
+    String relationshipName,
+    dynamic relationship,
+  ) async {
     final foreignKeys = models
         .map((model) => model.getValue(relationship.foreignKey))
         .where((id) => id != null)
@@ -783,7 +826,7 @@ class QueryBuilder<T extends Model<T>> {
     for (final model in models) {
       final foreignKeyValue = model.getValue(relationship.foreignKey);
       final relatedData = relatedByPrimaryKey[foreignKeyValue];
-      
+
       if (relatedData != null) {
         final relatedModel = relationship.relatedConstructor();
         relatedModel.fromMap(relatedData);
@@ -793,7 +836,11 @@ class QueryBuilder<T extends Model<T>> {
   }
 
   /// Load belongsToMany relationship in bulk
-  Future<void> _loadBelongsToManyRelationshipBulk(List<T> models, String relationshipName, dynamic relationship) async {
+  Future<void> _loadBelongsToManyRelationshipBulk(
+    List<T> models,
+    String relationshipName,
+    dynamic relationship,
+  ) async {
     final primaryKeys = models
         .map((model) => model.getValue(model.primaryKey))
         .where((id) => id != null)
@@ -802,15 +849,12 @@ class QueryBuilder<T extends Model<T>> {
     if (primaryKeys.isEmpty) return;
 
     final relatedInstance = relationship.relatedConstructor();
-    final rows = await Database.query(
-      '''
+    final rows = await Database.query('''
       SELECT ${relatedInstance.table}.*, ${relationship.pivotTable}.${relationship.parentPivotKey}
       FROM ${relatedInstance.table}
       INNER JOIN ${relationship.pivotTable} ON ${relatedInstance.table}.${relationship.foreignKey} = ${relationship.pivotTable}.${relationship.relatedPivotKey}
       WHERE ${relationship.pivotTable}.${relationship.parentPivotKey} IN (${primaryKeys.map((_) => '?').join(', ')})
-      ''',
-      primaryKeys,
-    );
+      ''', primaryKeys);
 
     // Group related records by parent key
     final relatedByParentKey = <dynamic, List<Map<String, dynamic>>>{};
@@ -823,7 +867,7 @@ class QueryBuilder<T extends Model<T>> {
     for (final model in models) {
       final primaryKeyValue = model.getValue(model.primaryKey);
       final relatedDataList = relatedByParentKey[primaryKeyValue] ?? [];
-      
+
       final relatedModels = relatedDataList.map((data) {
         final relatedModel = relationship.relatedConstructor();
         // Remove pivot column before mapping
@@ -832,12 +876,10 @@ class QueryBuilder<T extends Model<T>> {
         relatedModel.fromMap(cleanData);
         return relatedModel;
       }).toList();
-      
+
       model.setValue('_eager_$relationshipName', relatedModels);
     }
   }
-
-
 }
 
 /// Represents a WHERE condition
@@ -851,14 +893,14 @@ class BasicWhereCondition extends WhereCondition {
   final String column;
   final String operator;
   final dynamic value;
-  
+
   BasicWhereCondition(this.column, this.operator, this.value);
-  
+
   @override
   String toSql() {
     return '$column $operator ?';
   }
-  
+
   @override
   List<dynamic> getParameters() {
     return [value];
@@ -869,15 +911,15 @@ class BasicWhereCondition extends WhereCondition {
 class WhereInCondition extends WhereCondition {
   final String column;
   final List<dynamic> values;
-  
+
   WhereInCondition(this.column, this.values);
-  
+
   @override
   String toSql() {
     final placeholders = values.map((_) => '?').join(', ');
     return '$column IN ($placeholders)';
   }
-  
+
   @override
   List<dynamic> getParameters() {
     return values;
@@ -888,15 +930,15 @@ class WhereInCondition extends WhereCondition {
 class WhereNotInCondition extends WhereCondition {
   final String column;
   final List<dynamic> values;
-  
+
   WhereNotInCondition(this.column, this.values);
-  
+
   @override
   String toSql() {
     final placeholders = values.map((_) => '?').join(', ');
     return '$column NOT IN ($placeholders)';
   }
-  
+
   @override
   List<dynamic> getParameters() {
     return values;
@@ -907,14 +949,14 @@ class WhereNotInCondition extends WhereCondition {
 class WhereNullCondition extends WhereCondition {
   final String column;
   final bool isNull;
-  
+
   WhereNullCondition(this.column, this.isNull);
-  
+
   @override
   String toSql() {
     return isNull ? '$column IS NULL' : '$column IS NOT NULL';
   }
-  
+
   @override
   List<dynamic> getParameters() {
     return [];
@@ -926,14 +968,14 @@ class WhereBetweenCondition extends WhereCondition {
   final String column;
   final dynamic min;
   final dynamic max;
-  
+
   WhereBetweenCondition(this.column, this.min, this.max);
-  
+
   @override
   String toSql() {
     return '$column BETWEEN ? AND ?';
   }
-  
+
   @override
   List<dynamic> getParameters() {
     return [min, max];
@@ -944,54 +986,59 @@ class WhereBetweenCondition extends WhereCondition {
 class OrderClause {
   final String column;
   final String direction;
-  
+
   OrderClause(this.column, this.direction);
-  
+
   String toSql() {
     return '$column $direction';
   }
 }
 
 /// WHERE EXISTS condition for relationships
-class WhereExistsCondition<TRelated extends Model<TRelated>> extends WhereCondition {
+class WhereExistsCondition<TRelated extends Model<TRelated>>
+    extends WhereCondition {
   final String relationshipName;
   final dynamic relationship;
   final QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback;
   final bool exists;
-  
+
   WhereExistsCondition(
     this.relationshipName,
     this.relationship,
     this.callback, {
     required this.exists,
   });
-  
+
   @override
   String toSql() {
     final relatedInstance = relationship.relatedConstructor();
     final relatedTable = relatedInstance.table;
     final parentTable = relationship.parent.table;
-    
+
     // Build the EXISTS subquery based on relationship type
     String subquery;
     final relationshipTypeName = relationship.runtimeType.toString();
-    
-    if (relationshipTypeName.contains('HasOne') || relationshipTypeName.contains('HasMany')) {
+
+    if (relationshipTypeName.contains('HasOne') ||
+        relationshipTypeName.contains('HasMany')) {
       // Parent has related records
-      subquery = '''
+      subquery =
+          '''
         SELECT 1 FROM $relatedTable 
         WHERE $relatedTable.${relationship.foreignKey} = $parentTable.${relationship.localKey}
       ''';
     } else if (relationshipTypeName.contains('BelongsTo')) {
       // Parent belongs to related record
-      subquery = '''
+      subquery =
+          '''
         SELECT 1 FROM $relatedTable 
         WHERE $relatedTable.${relationship.localKey} = $parentTable.${relationship.foreignKey}
       ''';
     } else if (relationshipTypeName.contains('BelongsToMany')) {
       // Many-to-many relationship
       final pivotTable = relationship.pivotTable;
-      subquery = '''
+      subquery =
+          '''
         SELECT 1 FROM $relatedTable 
         INNER JOIN $pivotTable ON $relatedTable.${relationship.foreignKey} = $pivotTable.${relationship.relatedPivotKey}
         WHERE $pivotTable.${relationship.parentPivotKey} = $parentTable.${relationship.localKey}
@@ -999,44 +1046,49 @@ class WhereExistsCondition<TRelated extends Model<TRelated>> extends WhereCondit
     } else {
       throw UnsupportedError('Unsupported relationship type for EXISTS query');
     }
-    
+
     // Add callback conditions if provided
     if (callback != null) {
-      final tempQueryBuilder = QueryBuilder<TRelated>(relationship.relatedConstructor);
+      final tempQueryBuilder = QueryBuilder<TRelated>(
+        relationship.relatedConstructor,
+      );
       final modifiedQueryBuilder = callback!(tempQueryBuilder);
-      
+
       if (modifiedQueryBuilder._whereConditions.isNotEmpty) {
         final additionalWhere = modifiedQueryBuilder._buildWhereClause();
         subquery += ' AND ($additionalWhere)';
       }
     }
-    
+
     return exists ? 'EXISTS ($subquery)' : 'NOT EXISTS ($subquery)';
   }
-  
+
   @override
   List<dynamic> getParameters() {
     final parameters = <dynamic>[];
-    
+
     // Add parameters from callback conditions if provided
     if (callback != null) {
-      final tempQueryBuilder = QueryBuilder<TRelated>(relationship.relatedConstructor);
+      final tempQueryBuilder = QueryBuilder<TRelated>(
+        relationship.relatedConstructor,
+      );
       final modifiedQueryBuilder = callback!(tempQueryBuilder);
       parameters.addAll(modifiedQueryBuilder._getParameters());
     }
-    
+
     return parameters;
   }
 }
 
 /// WHERE condition for relationship count
-class WhereRelationshipCountCondition<TRelated extends Model<TRelated>> extends WhereCondition {
+class WhereRelationshipCountCondition<TRelated extends Model<TRelated>>
+    extends WhereCondition {
   final String relationshipName;
   final dynamic relationship;
   final String operator;
   final int count;
   final QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback;
-  
+
   WhereRelationshipCountCondition(
     this.relationshipName,
     this.relationship,
@@ -1044,33 +1096,37 @@ class WhereRelationshipCountCondition<TRelated extends Model<TRelated>> extends 
     this.count,
     this.callback,
   );
-  
+
   @override
   String toSql() {
     final relatedInstance = relationship.relatedConstructor();
     final relatedTable = relatedInstance.table;
     final parentTable = relationship.parent.table;
-    
+
     // Build the COUNT subquery based on relationship type
     String subquery;
     final relationshipTypeName = relationship.runtimeType.toString();
-    
-    if (relationshipTypeName.contains('HasOne') || relationshipTypeName.contains('HasMany')) {
+
+    if (relationshipTypeName.contains('HasOne') ||
+        relationshipTypeName.contains('HasMany')) {
       // Parent has related records
-      subquery = '''
+      subquery =
+          '''
         SELECT COUNT(*) FROM $relatedTable 
         WHERE $relatedTable.${relationship.foreignKey} = $parentTable.${relationship.localKey}
       ''';
     } else if (relationshipTypeName.contains('BelongsTo')) {
       // Parent belongs to related record (count should be 0 or 1)
-      subquery = '''
+      subquery =
+          '''
         SELECT COUNT(*) FROM $relatedTable 
         WHERE $relatedTable.${relationship.localKey} = $parentTable.${relationship.foreignKey}
       ''';
     } else if (relationshipTypeName.contains('BelongsToMany')) {
       // Many-to-many relationship
       final pivotTable = relationship.pivotTable;
-      subquery = '''
+      subquery =
+          '''
         SELECT COUNT(*) FROM $relatedTable 
         INNER JOIN $pivotTable ON $relatedTable.${relationship.foreignKey} = $pivotTable.${relationship.relatedPivotKey}
         WHERE $pivotTable.${relationship.parentPivotKey} = $parentTable.${relationship.localKey}
@@ -1078,35 +1134,39 @@ class WhereRelationshipCountCondition<TRelated extends Model<TRelated>> extends 
     } else {
       throw UnsupportedError('Unsupported relationship type for COUNT query');
     }
-    
+
     // Add callback conditions if provided
     if (callback != null) {
-      final tempQueryBuilder = QueryBuilder<TRelated>(relationship.relatedConstructor);
+      final tempQueryBuilder = QueryBuilder<TRelated>(
+        relationship.relatedConstructor,
+      );
       final modifiedQueryBuilder = callback!(tempQueryBuilder);
-      
+
       if (modifiedQueryBuilder._whereConditions.isNotEmpty) {
         final additionalWhere = modifiedQueryBuilder._buildWhereClause();
         subquery += ' AND ($additionalWhere)';
       }
     }
-    
+
     return '($subquery) $operator ?';
   }
-  
+
   @override
   List<dynamic> getParameters() {
     final parameters = <dynamic>[];
-    
+
     // Add parameters from callback conditions if provided
     if (callback != null) {
-      final tempQueryBuilder = QueryBuilder<TRelated>(relationship.relatedConstructor);
+      final tempQueryBuilder = QueryBuilder<TRelated>(
+        relationship.relatedConstructor,
+      );
       final modifiedQueryBuilder = callback!(tempQueryBuilder);
       parameters.addAll(modifiedQueryBuilder._getParameters());
     }
-    
+
     // Add the count parameter
     parameters.add(count);
-    
+
     return parameters;
   }
 }
@@ -1115,25 +1175,25 @@ class WhereRelationshipCountCondition<TRelated extends Model<TRelated>> extends 
 class PaginationResult<T> {
   /// The paginated data
   final List<T> data;
-  
+
   /// Current page number
   final int currentPage;
-  
+
   /// Number of items per page
   final int perPage;
-  
+
   /// Total number of items
   final int total;
-  
+
   /// Last page number
   final int lastPage;
-  
+
   /// Starting item number for current page
   final int from;
-  
+
   /// Ending item number for current page
   final int to;
-  
+
   const PaginationResult({
     required this.data,
     required this.currentPage,
@@ -1143,25 +1203,25 @@ class PaginationResult<T> {
     required this.from,
     required this.to,
   });
-  
+
   /// Whether there are more pages after current page
   bool get hasMorePages => currentPage < lastPage;
-  
+
   /// Whether there are pages before current page
   bool get hasPreviousPages => currentPage > 1;
-  
+
   /// Get next page number (null if no next page)
   int? get nextPage => hasMorePages ? currentPage + 1 : null;
-  
+
   /// Get previous page number (null if no previous page)
   int? get previousPage => hasPreviousPages ? currentPage - 1 : null;
-  
+
   /// Whether the pagination result is empty
   bool get isEmpty => data.isEmpty;
-  
+
   /// Whether the pagination result is not empty
   bool get isNotEmpty => data.isNotEmpty;
-  
+
   /// Number of items in current page
   int get count => data.length;
 }

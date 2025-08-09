@@ -78,7 +78,10 @@ void main() {
         expect(user.roleId, isNull);
 
         // But fields with default values should use their defaults
-        expect(user.status, equals('active')); // StringField has defaultValue: 'active'
+        expect(
+          user.status,
+          equals('active'),
+        ); // StringField has defaultValue: 'active'
 
         // Set to null explicitly
         user.name = null;
@@ -114,7 +117,7 @@ void main() {
           'id',
           'name',
           'email',
-          'password', 
+          'password',
           'status',
           'role_id',
           'created_at',
@@ -212,10 +215,22 @@ void main() {
         expect(GeneratedTestUserFields.email, equals('email'));
         expect(GeneratedTestUserFields.password, equals('password'));
         expect(GeneratedTestUserFields.status, equals('status'));
-        expect(GeneratedTestUserFields.roleId, equals('role_id')); // camelCase -> snake_case
-        expect(GeneratedTestUserFields.createdAt, equals('created_at')); // camelCase -> snake_case
-        expect(GeneratedTestUserFields.updatedAt, equals('updated_at')); // camelCase -> snake_case
-        expect(GeneratedTestUserFields.deletedAt, equals('deleted_at')); // camelCase -> snake_case
+        expect(
+          GeneratedTestUserFields.roleId,
+          equals('role_id'),
+        ); // camelCase -> snake_case
+        expect(
+          GeneratedTestUserFields.createdAt,
+          equals('created_at'),
+        ); // camelCase -> snake_case
+        expect(
+          GeneratedTestUserFields.updatedAt,
+          equals('updated_at'),
+        ); // camelCase -> snake_case
+        expect(
+          GeneratedTestUserFields.deletedAt,
+          equals('deleted_at'),
+        ); // camelCase -> snake_case
       });
 
       test('type-safe queries work with field references', () async {
@@ -235,11 +250,15 @@ void main() {
         await user2.save();
 
         // Test type-safe WHERE queries
-        final activeUsers = await GeneratedTestUser().where(GeneratedTestUserFields.status, 'active').get();
+        final activeUsers = await GeneratedTestUser()
+            .where(GeneratedTestUserFields.status, 'active')
+            .get();
         expect(activeUsers, hasLength(1));
         expect(activeUsers.first.name, equals('John Doe'));
 
-        final role25Users = await GeneratedTestUser().where(GeneratedTestUserFields.roleId, 25).get();
+        final role25Users = await GeneratedTestUser()
+            .where(GeneratedTestUserFields.roleId, 25)
+            .get();
         expect(role25Users, hasLength(1));
         expect(role25Users.first.name, equals('John Doe'));
       });
@@ -265,7 +284,10 @@ void main() {
         await user3.save();
 
         // Test type-safe WHERE IN
-        final users = await GeneratedTestUser().whereIn(GeneratedTestUserFields.roleId, [25, 30]).get();
+        final users = await GeneratedTestUser().whereIn(
+          GeneratedTestUserFields.roleId,
+          [25, 30],
+        ).get();
         expect(users, hasLength(2));
 
         final names = users.map((u) => u.name).toList();
@@ -292,12 +314,22 @@ void main() {
         await user3.save();
 
         // Test type-safe ORDER BY ASC
-        final usersAsc = await GeneratedTestUser().orderByAsc(GeneratedTestUserFields.name).get();
-        expect(usersAsc.map((u) => u.name).toList(), equals(['Alice', 'Bob', 'Charlie']));
+        final usersAsc = await GeneratedTestUser()
+            .orderByAsc(GeneratedTestUserFields.name)
+            .get();
+        expect(
+          usersAsc.map((u) => u.name).toList(),
+          equals(['Alice', 'Bob', 'Charlie']),
+        );
 
         // Test type-safe ORDER BY DESC
-        final usersDesc = await GeneratedTestUser().orderByDesc(GeneratedTestUserFields.name).get();
-        expect(usersDesc.map((u) => u.name).toList(), equals(['Charlie', 'Bob', 'Alice']));
+        final usersDesc = await GeneratedTestUser()
+            .orderByDesc(GeneratedTestUserFields.name)
+            .get();
+        expect(
+          usersDesc.map((u) => u.name).toList(),
+          equals(['Charlie', 'Bob', 'Alice']),
+        );
       });
 
       test('type-safe SELECT queries work', () async {
@@ -309,7 +341,10 @@ void main() {
 
         // Test type-safe SELECT with specific fields
         final results = await GeneratedTestUser()
-            .select([GeneratedTestUserFields.name, GeneratedTestUserFields.email])
+            .select([
+              GeneratedTestUserFields.name,
+              GeneratedTestUserFields.email,
+            ])
             .where(GeneratedTestUserFields.roleId, 25)
             .get();
 
@@ -536,7 +571,10 @@ void main() {
           await user.save();
           final savedId = user.id;
 
-          final foundUser = await Model.find<TestUser>(savedId, () => TestUser());
+          final foundUser = await Model.find<TestUser>(
+            savedId,
+            () => TestUser(),
+          );
 
           expect(foundUser, isNotNull);
           expect(foundUser!.id, equals(savedId));
@@ -763,7 +801,9 @@ void main() {
           await user.save();
         }
 
-        final totalSum = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).sum(GeneratedTestUserFields.roleId);
+        final totalSum = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).sum(GeneratedTestUserFields.roleId);
         expect(totalSum, equals(150.0)); // 10+20+30+40+50 = 150
       });
 
@@ -777,7 +817,9 @@ void main() {
           await user.save();
         }
 
-        final average = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).avg(GeneratedTestUserFields.roleId);
+        final average = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).avg(GeneratedTestUserFields.roleId);
         expect(average, equals(12.5)); // (5+10+15+20)/4 = 12.5
       });
 
@@ -791,12 +833,14 @@ void main() {
           await user.save();
         }
 
-        final maximum = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).max(GeneratedTestUserFields.roleId);
+        final maximum = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).max(GeneratedTestUserFields.roleId);
         expect(maximum, equals(35));
       });
 
       test('min method works correctly', () async {
-        // Create test data  
+        // Create test data
         for (int i = 3; i <= 7; i++) {
           final user = GeneratedTestUser();
           user.name = 'User $i';
@@ -805,15 +849,19 @@ void main() {
           await user.save();
         }
 
-        final minimum = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).min(GeneratedTestUserFields.roleId);
+        final minimum = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).min(GeneratedTestUserFields.roleId);
         expect(minimum, equals(12));
       });
     });
 
     group('Relationship Registry Tests', () {
-      test('relationships are auto-registered during model construction', () async {
-        // Create tables for user_example.dart models
-        await Database.execute('''
+      test(
+        'relationships are auto-registered during model construction',
+        () async {
+          // Create tables for user_example.dart models
+          await Database.execute('''
           CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(255),
@@ -825,8 +873,8 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
-        await Database.execute('''
+
+          await Database.execute('''
           CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -836,8 +884,8 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
-        await Database.execute('''
+
+          await Database.execute('''
           CREATE TABLE IF NOT EXISTS profiles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -848,86 +896,137 @@ void main() {
           )
         ''');
 
-        // Test with User from user_example.dart
-        final user = User();
-        
-        // Verify relationships are registered (User has 4 relationships)
-        expect(user.relationships.get('posts'), isNotNull, reason: 'HasMany<Post> posts() should be registered');
-        expect(user.relationships.get('profile'), isNotNull, reason: 'HasOne<Profile> profile() should be registered');
-        expect(user.relationships.get('comments'), isNotNull, reason: 'HasMany<Comment> comments() should be registered');
-        expect(user.relationships.get('roles'), isNotNull, reason: 'BelongsToMany<Role> roles() should be registered');
-        
-        // Verify relationship types
-        final postsRel = user.relationships.get('posts');
-        final profileRel = user.relationships.get('profile');
-        final commentsRel = user.relationships.get('comments');
-        final rolesRel = user.relationships.get('roles');
-        
-        expect(postsRel.runtimeType.toString(), contains('HasMany'), reason: 'posts should be HasMany relationship');
-        expect(profileRel.runtimeType.toString(), contains('HasOne'), reason: 'profile should be HasOne relationship');
-        expect(commentsRel.runtimeType.toString(), contains('HasMany'), reason: 'comments should be HasMany relationship');
-        expect(rolesRel.runtimeType.toString(), contains('BelongsToMany'), reason: 'roles should be BelongsToMany relationship');
-        
-        print('✅ All 4 relationships registered: ${user.relationships.names}');
-      });
+          // Test with User from user_example.dart
+          final user = User();
+
+          // Verify relationships are registered (User has 4 relationships)
+          expect(
+            user.relationships.get('posts'),
+            isNotNull,
+            reason: 'HasMany<Post> posts() should be registered',
+          );
+          expect(
+            user.relationships.get('profile'),
+            isNotNull,
+            reason: 'HasOne<Profile> profile() should be registered',
+          );
+          expect(
+            user.relationships.get('comments'),
+            isNotNull,
+            reason: 'HasMany<Comment> comments() should be registered',
+          );
+          expect(
+            user.relationships.get('roles'),
+            isNotNull,
+            reason: 'BelongsToMany<Role> roles() should be registered',
+          );
+
+          // Verify relationship types
+          final postsRel = user.relationships.get('posts');
+          final profileRel = user.relationships.get('profile');
+          final commentsRel = user.relationships.get('comments');
+          final rolesRel = user.relationships.get('roles');
+
+          expect(
+            postsRel.runtimeType.toString(),
+            contains('HasMany'),
+            reason: 'posts should be HasMany relationship',
+          );
+          expect(
+            profileRel.runtimeType.toString(),
+            contains('HasOne'),
+            reason: 'profile should be HasOne relationship',
+          );
+          expect(
+            commentsRel.runtimeType.toString(),
+            contains('HasMany'),
+            reason: 'comments should be HasMany relationship',
+          );
+          expect(
+            rolesRel.runtimeType.toString(),
+            contains('BelongsToMany'),
+            reason: 'roles should be BelongsToMany relationship',
+          );
+
+          print(
+            '✅ All 4 relationships registered: ${user.relationships.names}',
+          );
+        },
+      );
 
       test('relationship registry basic functionality', () async {
         // Test basic relationship registry without complex data setup
         final user = User();
-        
-        // Verify relationships are registered  
+
+        // Verify relationships are registered
         final relationshipNames = user.relationships.names;
         expect(relationshipNames.length, equals(4));
         expect(relationshipNames, contains('posts'));
         expect(relationshipNames, contains('profile'));
         expect(relationshipNames, contains('comments'));
         expect(relationshipNames, contains('roles'));
-        
+
         // Test that non-existent relationships return null
         expect(user.relationships.get('nonexistent'), isNull);
-        
+
         print('✅ Basic relationship registry functionality working');
       });
 
       test('relationship registry handles BelongsTo relationships', () {
         final post = Post();
-        
+
         // Verify BelongsTo relationships are registered
-        expect(post.relationships.get('user'), isNotNull, reason: 'BelongsTo<User> user() should be registered');
-        expect(post.relationships.get('comments'), isNotNull, reason: 'HasMany<Comment> comments() should be registered');
-        
+        expect(
+          post.relationships.get('user'),
+          isNotNull,
+          reason: 'BelongsTo<User> user() should be registered',
+        );
+        expect(
+          post.relationships.get('comments'),
+          isNotNull,
+          reason: 'HasMany<Comment> comments() should be registered',
+        );
+
         final userRel = post.relationships.get('user');
         final commentsRel = post.relationships.get('comments');
-        
+
         expect(userRel.runtimeType.toString(), contains('BelongsTo'));
         expect(commentsRel.runtimeType.toString(), contains('HasMany'));
-        
-        print('✅ BelongsTo relationships registered: ${post.relationships.names}');
+
+        print(
+          '✅ BelongsTo relationships registered: ${post.relationships.names}',
+        );
       });
 
       test('relationship registry is consistent across model instances', () {
         final user1 = User();
         final user2 = User();
-        
+
         // Both instances should have the same registered relationships
         expect(user1.relationships.names, equals(user2.relationships.names));
-        expect(user1.relationships.names.length, equals(4)); // posts, profile, comments, roles
-        
+        expect(
+          user1.relationships.names.length,
+          equals(4),
+        ); // posts, profile, comments, roles
+
         // Relationship objects should be independent instances
-        expect(user1.relationships.get('posts'), isNot(same(user2.relationships.get('posts'))));
+        expect(
+          user1.relationships.get('posts'),
+          isNot(same(user2.relationships.get('posts'))),
+        );
       });
 
       test('relationship registry works with code generation', () {
         // Verify that initializeRelationships() is called automatically
         final user = User();
-        
+
         // This should work because initializeRelationships() was called in constructor
         // and registerRelationship() was called for each relationship
         expect(user.relationships.get('posts'), isNotNull);
-        
+
         // Verify the generated initializeRelationships method exists and works
         user.initializeRelationships(); // Should not throw and should re-register
-        
+
         expect(user.relationships.get('posts'), isNotNull);
         expect(user.relationships.get('profile'), isNotNull);
         expect(user.relationships.get('comments'), isNotNull);
@@ -948,7 +1047,7 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
+
         await Database.execute('''
           CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -959,7 +1058,7 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
+
         await Database.execute('''
           CREATE TABLE IF NOT EXISTS profiles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -970,7 +1069,7 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
+
         await Database.execute('''
           CREATE TABLE IF NOT EXISTS comments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -981,74 +1080,87 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
+
         // Create test user with data
         final user = User();
         user.name = 'Test User';
         user.email = 'test@example.com';
         user.password = 'password123';
         await user.save();
-        
+
         // Create related posts
         final post1 = Post();
         post1.userId = user.id;
         post1.title = 'First Post';
         post1.content = 'Content of first post';
         await post1.save();
-        
+
         final post2 = Post();
         post2.userId = user.id;
         post2.title = 'Second Post';
         post2.content = 'Content of second post';
         await post2.save();
-        
+
         // Create profile
         final profile = Profile();
         profile.userId = user.id;
         profile.bio = 'Test user bio';
         profile.avatar = 'avatar.jpg';
         await profile.save();
-        
+
         // Create comments
         final comment1 = Comment();
         comment1.userId = user.id;
         comment1.postId = post1.id;
         comment1.content = 'Comment on first post';
         await comment1.save();
-        
+
         final comment2 = Comment();
         comment2.userId = user.id;
         comment2.postId = post2.id;
         comment2.content = 'Comment on second post';
         await comment2.save();
-        
+
         // Test dynamic relationship loading
-        final userWithRelations = await User().query()
+        final userWithRelations = await User()
+            .query()
             .include(['posts', 'profile', 'comments'])
             .where('id', user.id)
             .first();
-        
+
         expect(userWithRelations, isNotNull);
         expect(userWithRelations!.name, equals('Test User'));
         expect(userWithRelations.email, equals('test@example.com'));
-        
+
         // Debug: Check if relationships exist in registry
         final relationshipNames = userWithRelations.relationships.names;
         print('🔍 Available relationships: $relationshipNames');
-        
+
         // Verify relationships are registered (lazy loading should work)
         final postsRel = userWithRelations.relationships.get('posts');
         final profileRel = userWithRelations.relationships.get('profile');
         final commentsRel = userWithRelations.relationships.get('comments');
-        
-        expect(postsRel, isNotNull, reason: 'Posts relationship should be registered');
-        expect(profileRel, isNotNull, reason: 'Profile relationship should be registered');
-        expect(commentsRel, isNotNull, reason: 'Comments relationship should be registered');
-        
+
+        expect(
+          postsRel,
+          isNotNull,
+          reason: 'Posts relationship should be registered',
+        );
+        expect(
+          profileRel,
+          isNotNull,
+          reason: 'Profile relationship should be registered',
+        );
+        expect(
+          commentsRel,
+          isNotNull,
+          reason: 'Comments relationship should be registered',
+        );
+
         print('🔍 Posts relationship exists: ${postsRel != null}');
         print('🔍 Profile relationship exists: ${profileRel != null}');
         print('🔍 Comments relationship exists: ${commentsRel != null}');
-        
+
         // For now, let's just verify the relationships exist and can be called
         // Note: The actual loading might depend on QueryBuilder's include() implementation
         if (postsRel != null) {
@@ -1056,56 +1168,66 @@ void main() {
           final postsData = await postsRel.get();
           print('🔍 Posts data loaded: ${postsData != null}');
         }
-        
+
         if (profileRel != null) {
           final profileData = await profileRel.get();
           print('🔍 Profile data loaded: ${profileData != null}');
         }
-        
+
         if (commentsRel != null) {
           final commentsData = await commentsRel.get();
           print('🔍 Comments data loaded: ${commentsData != null}');
         }
-        
+
         print('✅ Relationship data loading successful!');
         print('✅ User: ${userWithRelations.name}');
         print('✅ Posts relationship loaded: ${postsRel?.isLoaded ?? false}');
-        print('✅ Profile relationship loaded: ${profileRel?.isLoaded ?? false}');
-        print('✅ Comments relationship loaded: ${commentsRel?.isLoaded ?? false}');
+        print(
+          '✅ Profile relationship loaded: ${profileRel?.isLoaded ?? false}',
+        );
+        print(
+          '✅ Comments relationship loaded: ${commentsRel?.isLoaded ?? false}',
+        );
       });
 
       test('lazy relationship loading prevents circular references', () async {
         // This test verifies that lazy loading prevents the stack overflow
         // that would occur with eager relationship creation
-        
+
         // Create a user - this should not cause stack overflow
         final user = User();
         expect(user.relationships.names, contains('posts'));
         expect(user.relationships.names, contains('roles'));
-        
-        // Create a role - this should not cause stack overflow  
+
+        // Create a role - this should not cause stack overflow
         final role = Role();
         expect(role.relationships.names, contains('users'));
-        
+
         // Relationships should exist but not be loaded yet
         final userRolesRel = user.relationships.get('roles');
         final roleUsersRel = role.relationships.get('users');
-        
+
         expect(userRolesRel, isNotNull);
         expect(roleUsersRel, isNotNull);
-        
+
         // Relationships should not be loaded initially (lazy)
         expect(userRolesRel!.isLoaded, isFalse);
         expect(roleUsersRel!.isLoaded, isFalse);
-        
+
         print('✅ Lazy loading prevents circular references!');
-        print('✅ User roles relationship exists but not loaded: ${!userRolesRel.isLoaded}');
-        print('✅ Role users relationship exists but not loaded: ${!roleUsersRel.isLoaded}');
+        print(
+          '✅ User roles relationship exists but not loaded: ${!userRolesRel.isLoaded}',
+        );
+        print(
+          '✅ Role users relationship exists but not loaded: ${!roleUsersRel.isLoaded}',
+        );
       });
-      
-      test('generated models support short API for type-safe relationship access', () async {
-        // Create tables (same as successful tests)
-        await Database.execute('''
+
+      test(
+        'generated models support short API for type-safe relationship access',
+        () async {
+          // Create tables (same as successful tests)
+          await Database.execute('''
           CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(255),
@@ -1117,8 +1239,8 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
-        await Database.execute('''
+
+          await Database.execute('''
           CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -1128,8 +1250,8 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
-        await Database.execute('''
+
+          await Database.execute('''
           CREATE TABLE IF NOT EXISTS profiles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -1139,59 +1261,66 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
-        // Create user
-        final user = User();
-        user.name = 'Test User';
-        user.email = 'test@example.com';
-        await user.save();
-        
-        // Create posts
-        final post1 = Post();
-        post1.userId = user.id;
-        post1.title = 'First Post';
-        post1.content = 'Content of first post';
-        await post1.save();
-        
-        final post2 = Post();
-        post2.userId = user.id;
-        post2.title = 'Second Post';
-        post2.content = 'Content of second post';
-        await post2.save();
-        
-        // Create profile
-        final profile = Profile();
-        profile.userId = user.id;
-        profile.bio = 'Software Developer';
-        profile.avatar = 'avatar.jpg';
-        await profile.save();
-        
-        // Test short API - HasMany (many)
-        final List<Post> posts = await user.relationships.many<Post>('posts');
-        expect(posts, hasLength(2));
-        expect(posts.map((p) => p.title), containsAll(['First Post', 'Second Post']));
-        expect(posts.every((p) => p.userId == user.id), isTrue);
-        
-        // Test short API - HasOne (one)
-        final Profile? retrievedProfile = await user.relationships.one<Profile>('profile');
-        expect(retrievedProfile, isNotNull);
-        expect(retrievedProfile!.userId, equals(user.id));
-        expect(retrievedProfile.bio, equals('Software Developer'));
-        expect(retrievedProfile.avatar, equals('avatar.jpg'));
-        
-        // Test short API - BelongsTo (belongsTo)
-        final User? retrievedUser = await post1.relationships.belongsTo<User>('user');
-        expect(retrievedUser, isNotNull);
-        expect(retrievedUser!.id, equals(user.id));
-        expect(retrievedUser.name, equals('Test User'));
-        expect(retrievedUser.email, equals('test@example.com'));
-        
-        print('✅ Generated models short API test successful!');
-        print('✅ Posts count: ${posts.length}');
-        print('✅ Profile bio: ${retrievedProfile.bio}');
-        print('✅ User name: ${retrievedUser.name}');
-      });
-      
+
+          // Create user
+          final user = User();
+          user.name = 'Test User';
+          user.email = 'test@example.com';
+          await user.save();
+
+          // Create posts
+          final post1 = Post();
+          post1.userId = user.id;
+          post1.title = 'First Post';
+          post1.content = 'Content of first post';
+          await post1.save();
+
+          final post2 = Post();
+          post2.userId = user.id;
+          post2.title = 'Second Post';
+          post2.content = 'Content of second post';
+          await post2.save();
+
+          // Create profile
+          final profile = Profile();
+          profile.userId = user.id;
+          profile.bio = 'Software Developer';
+          profile.avatar = 'avatar.jpg';
+          await profile.save();
+
+          // Test short API - HasMany (many)
+          final List<Post> posts = await user.relationships.many<Post>('posts');
+          expect(posts, hasLength(2));
+          expect(
+            posts.map((p) => p.title),
+            containsAll(['First Post', 'Second Post']),
+          );
+          expect(posts.every((p) => p.userId == user.id), isTrue);
+
+          // Test short API - HasOne (one)
+          final Profile? retrievedProfile = await user.relationships
+              .one<Profile>('profile');
+          expect(retrievedProfile, isNotNull);
+          expect(retrievedProfile!.userId, equals(user.id));
+          expect(retrievedProfile.bio, equals('Software Developer'));
+          expect(retrievedProfile.avatar, equals('avatar.jpg'));
+
+          // Test short API - BelongsTo (belongsTo)
+          final User? retrievedUser = await post1.relationships.belongsTo<User>(
+            'user',
+          );
+          expect(retrievedUser, isNotNull);
+          expect(retrievedUser!.id, equals(user.id));
+          expect(retrievedUser.name, equals('Test User'));
+          expect(retrievedUser.email, equals('test@example.com'));
+
+          print('✅ Generated models short API test successful!');
+          print('✅ Posts count: ${posts.length}');
+          print('✅ Profile bio: ${retrievedProfile.bio}');
+          print('✅ User name: ${retrievedUser.name}');
+        },
+      );
+
       test('generated models handle null results correctly in short API', () async {
         // Create tables (same as successful tests)
         await Database.execute('''
@@ -1206,7 +1335,7 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
+
         await Database.execute('''
           CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1217,7 +1346,7 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
+
         await Database.execute('''
           CREATE TABLE IF NOT EXISTS profiles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1228,65 +1357,77 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
+
         // Create user without relationships
         final user = User();
         user.name = 'Lonely User';
         user.email = 'lonely@example.com';
         await user.save();
-        
+
         // Test that null is returned for missing HasOne relationship
-        final Profile? profile = await user.relationships.one<Profile>('profile');
+        final Profile? profile = await user.relationships.one<Profile>(
+          'profile',
+        );
         expect(profile, isNull);
-        
+
         // Test that empty list is returned for missing HasMany relationship
         final List<Post> posts = await user.relationships.many<Post>('posts');
         expect(posts, isEmpty);
-        
+
         // Create orphan post (post without user)
         final orphanPost = Post();
         orphanPost.title = 'Orphan Post';
         orphanPost.content = 'No user';
         orphanPost.userId = 999; // Non-existent user
         await orphanPost.save();
-        
+
         // Test BelongsTo with non-existent user
-        final User? nonExistentUser = await orphanPost.relationships.belongsTo<User>('user');
+        final User? nonExistentUser = await orphanPost.relationships
+            .belongsTo<User>('user');
         expect(nonExistentUser, isNull);
-        
+
         print('✅ Generated models null handling test successful!');
-        print('✅ Profile for user without profile: ${profile == null ? 'null' : 'exists'}');
-        print('✅ Posts for user without posts: ${posts.isEmpty ? 'empty' : 'has data'}');
-        print('✅ User for orphan post: ${nonExistentUser == null ? 'null' : 'exists'}');
+        print(
+          '✅ Profile for user without profile: ${profile == null ? 'null' : 'exists'}',
+        );
+        print(
+          '✅ Posts for user without posts: ${posts.isEmpty ? 'empty' : 'has data'}',
+        );
+        print(
+          '✅ User for orphan post: ${nonExistentUser == null ? 'null' : 'exists'}',
+        );
       });
-      
-      test('generated models throw errors for non-existent relationships in short API', () async {
-        final user = User();
-        
-        // Test that accessing non-existent relationships throws ArgumentError
-        expect(
-          () => user.relationships.many<Post>('nonexistent'),
-          throwsA(isA<ArgumentError>()),
-        );
-        
-        expect(
-          () => user.relationships.one<Profile>('nonexistent'),
-          throwsA(isA<ArgumentError>()),
-        );
-        
-        expect(
-          () => user.relationships.belongsTo<User>('nonexistent'),
-          throwsA(isA<ArgumentError>()),
-        );
-        
-        expect(
-          () => user.relationships.belongsToMany<Role>('nonexistent'),
-          throwsA(isA<ArgumentError>()),
-        );
-        
-        print('✅ Generated models error handling test successful!');
-      });
-      
+
+      test(
+        'generated models throw errors for non-existent relationships in short API',
+        () async {
+          final user = User();
+
+          // Test that accessing non-existent relationships throws ArgumentError
+          expect(
+            () => user.relationships.many<Post>('nonexistent'),
+            throwsA(isA<ArgumentError>()),
+          );
+
+          expect(
+            () => user.relationships.one<Profile>('nonexistent'),
+            throwsA(isA<ArgumentError>()),
+          );
+
+          expect(
+            () => user.relationships.belongsTo<User>('nonexistent'),
+            throwsA(isA<ArgumentError>()),
+          );
+
+          expect(
+            () => user.relationships.belongsToMany<Role>('nonexistent'),
+            throwsA(isA<ArgumentError>()),
+          );
+
+          print('✅ Generated models error handling test successful!');
+        },
+      );
+
       test('generated models support BelongsToMany short API', () async {
         // Create tables (same as successful tests)
         await Database.execute('''
@@ -1301,7 +1442,7 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
+
         await Database.execute('''
           CREATE TABLE IF NOT EXISTS roles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1310,22 +1451,22 @@ void main() {
             updated_at TEXT
           )
         ''');
-        
+
         // Create user
         final user = User();
         user.name = 'Test User';
         user.email = 'test@example.com';
         await user.save();
-        
+
         // Create roles
         final role1 = Role();
         role1.name = 'Admin';
         await role1.save();
-        
+
         final role2 = Role();
         role2.name = 'User';
         await role2.save();
-        
+
         // Create pivot table entries (must match example models: 'user_roles')
         try {
           await Database.execute('''
@@ -1335,20 +1476,28 @@ void main() {
               role_id INTEGER
             )
           ''');
-          
-          await Database.execute('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)', [user.id, role1.id]);
-          await Database.execute('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)', [user.id, role2.id]);
-          
+
+          await Database.execute(
+            'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
+            [user.id, role1.id],
+          );
+          await Database.execute(
+            'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
+            [user.id, role2.id],
+          );
+
           // Test BelongsToMany short API
-          final List<Role> userRoles = await user.relationships.belongsToMany<Role>('roles');
+          final List<Role> userRoles = await user.relationships
+              .belongsToMany<Role>('roles');
           expect(userRoles, hasLength(2));
           expect(userRoles.map((r) => r.name), containsAll(['Admin', 'User']));
-          
-          final List<User> roleUsers = await role1.relationships.belongsToMany<User>('users');
+
+          final List<User> roleUsers = await role1.relationships
+              .belongsToMany<User>('users');
           expect(roleUsers, hasLength(1));
           expect(roleUsers.first.id, equals(user.id));
           expect(roleUsers.first.name, equals('Test User'));
-          
+
           print('✅ Generated models BelongsToMany short API test successful!');
           print('✅ User roles count: ${userRoles.length}');
           print('✅ Role users count: ${roleUsers.length}');
@@ -1363,11 +1512,14 @@ void main() {
       test('_camelToSnakeCase converts complex patterns correctly', () {
         // Test direct access to camelToSnakeCase functionality through field names
         // This tests the column name conversion indirectly
-        
+
         // These should be converted to snake_case in the generated field constants
         expect(GeneratedTestUserFields.name, equals('name'));
         expect(GeneratedTestUserFields.email, equals('email'));
-        expect(GeneratedTestUserFields.roleId, equals('role_id')); // camelCase -> snake_case
+        expect(
+          GeneratedTestUserFields.roleId,
+          equals('role_id'),
+        ); // camelCase -> snake_case
       });
 
       test('handles null values in aggregation methods', () async {
@@ -1378,40 +1530,58 @@ void main() {
         user1.roleId = 100;
         await user1.save();
 
-        final user2 = GeneratedTestUser(); 
+        final user2 = GeneratedTestUser();
         user2.name = 'User without Role';
         user2.email = 'withoutrole@example.com';
         user2.roleId = null;
         await user2.save();
 
         // Aggregation should handle null values appropriately
-        final sum = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).sum(GeneratedTestUserFields.roleId);
+        final sum = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).sum(GeneratedTestUserFields.roleId);
         expect(sum, equals(100.0)); // Should ignore null values
 
-        final avg = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).avg(GeneratedTestUserFields.roleId);
+        final avg = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).avg(GeneratedTestUserFields.roleId);
         expect(avg, equals(100.0)); // Should ignore null values
 
-        final max = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).max(GeneratedTestUserFields.roleId);
+        final max = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).max(GeneratedTestUserFields.roleId);
         expect(max, equals(100));
 
-        final min = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).min(GeneratedTestUserFields.roleId);
+        final min = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).min(GeneratedTestUserFields.roleId);
         expect(min, equals(100));
       });
 
       test('generated methods handle empty result sets', () async {
         // Ensure database is clean
-        await DatabaseConnection.instance.execute('DELETE FROM test_users_generated');
+        await DatabaseConnection.instance.execute(
+          'DELETE FROM test_users_generated',
+        );
 
-        final count = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).count();
+        final count = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).count();
         expect(count, equals(0));
 
-        final exists = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).exists();
+        final exists = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).exists();
         expect(exists, isFalse);
 
-        final first = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).first();
+        final first = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).first();
         expect(first, isNull);
 
-        final results = await Model.query<GeneratedTestUser>(() => GeneratedTestUser()).get();
+        final results = await Model.query<GeneratedTestUser>(
+          () => GeneratedTestUser(),
+        ).get();
         expect(results, isEmpty);
       });
     });

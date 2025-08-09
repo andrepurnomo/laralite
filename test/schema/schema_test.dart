@@ -24,7 +24,7 @@ void main() {
 
         final columns = await Schema.getColumnListing('test_table');
         expect(columns.length, equals(3));
-        
+
         final columnNames = columns.map((c) => c['name']).toList();
         expect(columnNames, contains('id'));
         expect(columnNames, contains('name'));
@@ -51,7 +51,7 @@ void main() {
         });
 
         expect(await Schema.hasTable('comprehensive_table'), isTrue);
-        
+
         final columns = await Schema.getColumnListing('comprehensive_table');
         expect(columns.length, equals(15));
       });
@@ -71,14 +71,17 @@ void main() {
         // Test that we can insert data respecting constraints
         await Database.execute(
           'INSERT INTO constrained_table (name, email) VALUES (?, ?)',
-          ['John Doe', 'john@example.com']
+          ['John Doe', 'john@example.com'],
         );
 
         final result = await Database.query('SELECT * FROM constrained_table');
         expect(result.length, equals(1));
         expect(result.first['name'], equals('John Doe'));
         expect(result.first['age'], equals(0));
-        expect(result.first['active'], equals(1)); // SQLite stores boolean as integer
+        expect(
+          result.first['active'],
+          equals(1),
+        ); // SQLite stores boolean as integer
         expect(result.first['status'], equals('pending'));
       });
 
@@ -90,7 +93,7 @@ void main() {
         });
 
         expect(await Schema.hasTable('timestamped_table'), isTrue);
-        
+
         final columns = await Schema.getColumnListing('timestamped_table');
         final columnNames = columns.map((c) => c['name']).toList();
         expect(columnNames, contains('created_at'));
@@ -105,7 +108,7 @@ void main() {
         });
 
         expect(await Schema.hasTable('soft_delete_table'), isTrue);
-        
+
         final columns = await Schema.getColumnListing('soft_delete_table');
         final columnNames = columns.map((c) => c['name']).toList();
         expect(columnNames, contains('deleted_at'));
@@ -117,19 +120,19 @@ void main() {
           table.string('name');
           table.string('email');
           table.integer('age');
-          
+
           table.index('name');
           table.unique(['email']);
           table.index(['name', 'age']);
         });
 
         expect(await Schema.hasTable('indexed_table'), isTrue);
-        
+
         // Verify indexes were created (check sqlite_master)
         final indexes = await Database.query(
-          "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='indexed_table'"
+          "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='indexed_table'",
         );
-        
+
         expect(indexes.length, greaterThan(0));
       });
 
@@ -144,16 +147,19 @@ void main() {
           table.id();
           table.string('title');
           table.foreignId('user_id');
-          
+
           table.foreign('user_id', 'users.id');
         });
 
         expect(await Schema.hasTable('posts'), isTrue);
-        
+
         // Verify foreign key by inserting valid data
         await Database.execute('INSERT INTO users (name) VALUES (?)', ['John']);
-        await Database.execute('INSERT INTO posts (title, user_id) VALUES (?, ?)', ['Test Post', 1]);
-        
+        await Database.execute(
+          'INSERT INTO posts (title, user_id) VALUES (?, ?)',
+          ['Test Post', 1],
+        );
+
         final posts = await Database.query('SELECT * FROM posts');
         expect(posts.length, equals(1));
       });
@@ -175,7 +181,7 @@ void main() {
 
         final columns = await Schema.getColumnListing('alterable_table');
         final columnNames = columns.map((c) => c['name']).toList();
-        
+
         expect(columnNames, contains('id'));
         expect(columnNames, contains('name'));
         expect(columnNames, contains('age'));
@@ -196,9 +202,9 @@ void main() {
 
         // Verify indexes were created
         final indexes = await Database.query(
-          "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='index_test_table'"
+          "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='index_test_table'",
         );
-        
+
         expect(indexes.length, greaterThan(0));
       });
     });
@@ -206,11 +212,11 @@ void main() {
     group('Schema utility methods', () {
       test('hasTable() checks table existence', () async {
         expect(await Schema.hasTable('nonexistent_table'), isFalse);
-        
+
         await Schema.create('existing_table', (table) {
           table.id();
         });
-        
+
         expect(await Schema.hasTable('existing_table'), isTrue);
       });
 
@@ -222,7 +228,10 @@ void main() {
 
         expect(await Schema.hasColumn('column_test_table', 'id'), isTrue);
         expect(await Schema.hasColumn('column_test_table', 'name'), isTrue);
-        expect(await Schema.hasColumn('column_test_table', 'nonexistent'), isFalse);
+        expect(
+          await Schema.hasColumn('column_test_table', 'nonexistent'),
+          isFalse,
+        );
       });
 
       test('drop() removes table', () async {
@@ -231,9 +240,9 @@ void main() {
         });
 
         expect(await Schema.hasTable('droppable_table'), isTrue);
-        
+
         await Schema.drop('droppable_table');
-        
+
         expect(await Schema.hasTable('droppable_table'), isFalse);
       });
 
@@ -244,21 +253,21 @@ void main() {
         });
 
         expect(await Schema.hasTable('old_table_name'), isTrue);
-        
+
         await Schema.rename('old_table_name', 'new_table_name');
-        
+
         expect(await Schema.hasTable('old_table_name'), isFalse);
         expect(await Schema.hasTable('new_table_name'), isTrue);
       });
 
       test('foreign key constraints can be toggled', () async {
         await Schema.enableForeignKeyConstraints();
-        
+
         final result = await Database.query('PRAGMA foreign_keys');
         expect(result.first['foreign_keys'], equals(1));
-        
+
         await Schema.disableForeignKeyConstraints();
-        
+
         final result2 = await Database.query('PRAGMA foreign_keys');
         expect(result2.first['foreign_keys'], equals(0));
       });
@@ -275,11 +284,11 @@ void main() {
         });
 
         expect(await Schema.hasTable('sql_test_table'), isTrue);
-        
+
         // Test inserting data that validates constraints
         await Database.execute(
           'INSERT INTO sql_test_table (name, age, active, score) VALUES (?, ?, ?, ?)',
-          ['Test User', 25, 1, 85.5]
+          ['Test User', 25, 1, 85.5],
         );
 
         final result = await Database.query('SELECT * FROM sql_test_table');
@@ -297,14 +306,16 @@ void main() {
         });
 
         expect(await Schema.hasTable('custom_constraint_table'), isTrue);
-        
+
         // Valid email should work
         await Database.execute(
           'INSERT INTO custom_constraint_table (email, age) VALUES (?, ?)',
-          ['test@example.com', 25]
+          ['test@example.com', 25],
         );
 
-        final result = await Database.query('SELECT * FROM custom_constraint_table');
+        final result = await Database.query(
+          'SELECT * FROM custom_constraint_table',
+        );
         expect(result.length, equals(1));
       });
     });

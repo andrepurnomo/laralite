@@ -327,7 +327,7 @@ mixin TimestampsAndSoftDeletesMixin<T extends Model<T>> on Model<T>
       if (updatedAtField is TimestampField) {
         updatedAtField.touchIfAutoUpdate();
       }
-      
+
       // Touch created_at only for new records
       if (!exists) {
         final createdAtField = getField<DateTime>(createdAtColumn);

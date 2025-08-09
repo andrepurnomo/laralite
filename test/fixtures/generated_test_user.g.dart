@@ -7,20 +7,28 @@ part of 'generated_test_user.dart';
 extension _$GeneratedTestUserFieldAccess on GeneratedTestUser {
   /// Get id field for registration
   Field get idFieldRef => _id;
+
   /// Get name field for registration
   Field get nameFieldRef => _name;
+
   /// Get email field for registration
   Field get emailFieldRef => _email;
+
   /// Get password field for registration
   Field get passwordFieldRef => _password;
+
   /// Get status field for registration
   Field get statusFieldRef => _status;
+
   /// Get roleId field for registration
   Field get roleIdFieldRef => _roleId;
+
   /// Get createdAt field for registration
   Field get createdAtFieldRef => _createdAt;
+
   /// Get updatedAt field for registration
   Field get updatedAtFieldRef => _updatedAt;
+
   /// Get deletedAt field for registration
   Field get deletedAtFieldRef => _deletedAt;
 }
@@ -99,17 +107,27 @@ mixin _$GeneratedTestUserFields on Model<GeneratedTestUser> {
   }
 
   /// Add WHERE condition using type-safe field reference
-  QueryBuilder<GeneratedTestUser> where(String fieldRef, dynamic operator, [dynamic value]) {
+  QueryBuilder<GeneratedTestUser> where(
+    String fieldRef,
+    dynamic operator, [
+    dynamic value,
+  ]) {
     return query().where(fieldRef, operator, value);
   }
 
   /// Add WHERE IN condition using type-safe field reference
-  QueryBuilder<GeneratedTestUser> whereIn(String fieldRef, List<dynamic> values) {
+  QueryBuilder<GeneratedTestUser> whereIn(
+    String fieldRef,
+    List<dynamic> values,
+  ) {
     return query().whereIn(fieldRef, values);
   }
 
   /// Add WHERE NOT IN condition using type-safe field reference
-  QueryBuilder<GeneratedTestUser> whereNotIn(String fieldRef, List<dynamic> values) {
+  QueryBuilder<GeneratedTestUser> whereNotIn(
+    String fieldRef,
+    List<dynamic> values,
+  ) {
     return query().whereNotIn(fieldRef, values);
   }
 
@@ -124,12 +142,19 @@ mixin _$GeneratedTestUserFields on Model<GeneratedTestUser> {
   }
 
   /// Add WHERE BETWEEN condition using type-safe field reference
-  QueryBuilder<GeneratedTestUser> whereBetween(String fieldRef, dynamic min, dynamic max) {
+  QueryBuilder<GeneratedTestUser> whereBetween(
+    String fieldRef,
+    dynamic min,
+    dynamic max,
+  ) {
     return query().whereBetween(fieldRef, min, max);
   }
 
   /// Add ORDER BY clause using type-safe field reference
-  QueryBuilder<GeneratedTestUser> orderBy(String fieldRef, [String direction = 'ASC']) {
+  QueryBuilder<GeneratedTestUser> orderBy(
+    String fieldRef, [
+    String direction = 'ASC',
+  ]) {
     return query().orderBy(fieldRef, direction);
   }
 
@@ -169,7 +194,10 @@ mixin _$GeneratedTestUserFields on Model<GeneratedTestUser> {
   }
 
   /// Apply scope callback
-  QueryBuilder<GeneratedTestUser> scope(QueryBuilder<GeneratedTestUser> Function(QueryBuilder<GeneratedTestUser>) callback) {
+  QueryBuilder<GeneratedTestUser> scope(
+    QueryBuilder<GeneratedTestUser> Function(QueryBuilder<GeneratedTestUser>)
+    callback,
+  ) {
     return query().scope(callback);
   }
 
@@ -194,7 +222,10 @@ mixin _$GeneratedTestUserFields on Model<GeneratedTestUser> {
   }
 
   /// Paginate results
-  Future<PaginationResult<GeneratedTestUser>> paginate({int page = 1, int perPage = 15}) {
+  Future<PaginationResult<GeneratedTestUser>> paginate({
+    int page = 1,
+    int perPage = 15,
+  }) {
     return query().paginate(page: page, perPage: perPage);
   }
 
@@ -209,23 +240,45 @@ mixin _$GeneratedTestUserFields on Model<GeneratedTestUser> {
   }
 
   /// Apply conditional query logic
-  QueryBuilder<GeneratedTestUser> when(bool condition, QueryBuilder<GeneratedTestUser> Function(QueryBuilder<GeneratedTestUser>) callback) {
+  QueryBuilder<GeneratedTestUser> when(
+    bool condition,
+    QueryBuilder<GeneratedTestUser> Function(QueryBuilder<GeneratedTestUser>)
+    callback,
+  ) {
     return query().when(condition, callback);
   }
 
   /// Add WHERE EXISTS condition with relationship
-  QueryBuilder<GeneratedTestUser> whereHas<TRelated extends Model<TRelated>>(String relationshipName, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {
+  QueryBuilder<GeneratedTestUser> whereHas<TRelated extends Model<TRelated>>(
+    String relationshipName, [
+    QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback,
+  ]) {
     return query().whereHas<TRelated>(relationshipName, callback);
   }
 
   /// Add WHERE NOT EXISTS condition with relationship
-  QueryBuilder<GeneratedTestUser> whereDoesntHave<TRelated extends Model<TRelated>>(String relationshipName, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {
+  QueryBuilder<GeneratedTestUser>
+  whereDoesntHave<TRelated extends Model<TRelated>>(
+    String relationshipName, [
+    QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback,
+  ]) {
     return query().whereDoesntHave<TRelated>(relationshipName, callback);
   }
 
   /// Add WHERE condition for relationship count
-  QueryBuilder<GeneratedTestUser> whereHasCount<TRelated extends Model<TRelated>>(String relationshipName, String operator, int count, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {
-    return query().whereHasCount<TRelated>(relationshipName, operator, count, callback);
+  QueryBuilder<GeneratedTestUser>
+  whereHasCount<TRelated extends Model<TRelated>>(
+    String relationshipName,
+    String operator,
+    int count, [
+    QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback,
+  ]) {
+    return query().whereHasCount<TRelated>(
+      relationshipName,
+      operator,
+      count,
+      callback,
+    );
   }
 
   /// Include soft deleted records in query
@@ -269,17 +322,27 @@ mixin _$GeneratedTestUserFields on Model<GeneratedTestUser> {
   }
 
   /// Add OR WHERE condition
-  QueryBuilder<GeneratedTestUser> orWhere(String fieldRef, dynamic operator, [dynamic value]) {
+  QueryBuilder<GeneratedTestUser> orWhere(
+    String fieldRef,
+    dynamic operator, [
+    dynamic value,
+  ]) {
     return query().orWhere(fieldRef, operator, value);
   }
 
   /// Add OR WHERE IN condition
-  QueryBuilder<GeneratedTestUser> orWhereIn(String fieldRef, List<dynamic> values) {
+  QueryBuilder<GeneratedTestUser> orWhereIn(
+    String fieldRef,
+    List<dynamic> values,
+  ) {
     return query().orWhereIn(fieldRef, values);
   }
 
   /// Add OR WHERE NOT IN condition
-  QueryBuilder<GeneratedTestUser> orWhereNotIn(String fieldRef, List<dynamic> values) {
+  QueryBuilder<GeneratedTestUser> orWhereNotIn(
+    String fieldRef,
+    List<dynamic> values,
+  ) {
     return query().orWhereNotIn(fieldRef, values);
   }
 
@@ -294,10 +357,13 @@ mixin _$GeneratedTestUserFields on Model<GeneratedTestUser> {
   }
 
   /// Add OR WHERE BETWEEN condition
-  QueryBuilder<GeneratedTestUser> orWhereBetween(String fieldRef, dynamic min, dynamic max) {
+  QueryBuilder<GeneratedTestUser> orWhereBetween(
+    String fieldRef,
+    dynamic min,
+    dynamic max,
+  ) {
     return query().orWhereBetween(fieldRef, min, max);
   }
-
 }
 
 /// Type-safe field references for GeneratedTestUser queries
@@ -313,4 +379,3 @@ abstract class GeneratedTestUserFields {
   static const updatedAt = 'updated_at';
   static const deletedAt = 'deleted_at';
 }
-

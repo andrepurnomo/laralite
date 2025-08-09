@@ -162,7 +162,7 @@ class DatabaseHelper {
   static Future<void> dropAllTestTables() async {
     final tables = [
       'test_orders',
-      'test_comments', 
+      'test_comments',
       'test_posts',
       'test_products',
       'test_categories',
@@ -178,7 +178,7 @@ class DatabaseHelper {
   static Future<void> clearAllTestTables() async {
     final tables = [
       'test_orders',
-      'test_comments', 
+      'test_comments',
       'test_posts',
       'test_products',
       'test_categories',
@@ -187,12 +187,14 @@ class DatabaseHelper {
 
     // Disable foreign key constraints temporarily
     await Database.execute('PRAGMA foreign_keys = OFF');
-    
+
     for (final table in tables) {
       await Database.execute('DELETE FROM $table');
-      await Database.execute('DELETE FROM sqlite_sequence WHERE name = ?', [table]);
+      await Database.execute('DELETE FROM sqlite_sequence WHERE name = ?', [
+        table,
+      ]);
     }
-    
+
     // Re-enable foreign key constraints
     await Database.execute('PRAGMA foreign_keys = ON');
   }
@@ -332,7 +334,9 @@ class DatabaseHelper {
   }
 
   /// Execute a test within a transaction (rollback on completion)
-  static Future<T> executeInTransaction<T>(Future<T> Function() testFunction) async {
+  static Future<T> executeInTransaction<T>(
+    Future<T> Function() testFunction,
+  ) async {
     await Database.execute('BEGIN TRANSACTION');
     try {
       final result = await testFunction();
@@ -346,21 +350,25 @@ class DatabaseHelper {
 
   /// Get table row count for verification
   static Future<int> getTableRowCount(String tableName) async {
-    final result = await Database.query('SELECT COUNT(*) as count FROM $tableName');
+    final result = await Database.query(
+      'SELECT COUNT(*) as count FROM $tableName',
+    );
     return result.first['count'] as int;
   }
 
   /// Verify table exists
   static Future<bool> tableExists(String tableName) async {
     final result = await Database.query(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name=?", 
+      "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
       [tableName],
     );
     return result.isNotEmpty;
   }
 
   /// Get table schema information
-  static Future<List<Map<String, dynamic>>> getTableSchema(String tableName) async {
+  static Future<List<Map<String, dynamic>>> getTableSchema(
+    String tableName,
+  ) async {
     return await Database.query('PRAGMA table_info($tableName)');
   }
 
@@ -379,10 +387,10 @@ class DatabaseHelper {
   static Future<int> getDatabaseSize() async {
     final result = await Database.query('PRAGMA page_count');
     final pageCount = result.first['page_count'] as int;
-    
+
     final pageSizeResult = await Database.query('PRAGMA page_size');
     final pageSize = pageSizeResult.first['page_size'] as int;
-    
+
     return pageCount * pageSize;
   }
 
@@ -397,7 +405,9 @@ class DatabaseHelper {
   }
 
   /// Helper for performance testing
-  static Future<Duration> measureExecutionTime(Future<void> Function() operation) async {
+  static Future<Duration> measureExecutionTime(
+    Future<void> Function() operation,
+  ) async {
     final stopwatch = Stopwatch()..start();
     await operation();
     stopwatch.stop();
@@ -405,7 +415,9 @@ class DatabaseHelper {
   }
 
   /// Bulk insert helper for performance testing
-  static Future<void> bulkInsertUsers(List<Map<String, dynamic>> usersData) async {
+  static Future<void> bulkInsertUsers(
+    List<Map<String, dynamic>> usersData,
+  ) async {
     await Database.execute('BEGIN TRANSACTION');
     try {
       for (final userData in usersData) {
@@ -501,7 +513,7 @@ mixin DatabaseTestMixin {
 
   /// Test setup with seeded data
   late TestDataSeeds testData;
-  
+
   void setUpDatabaseTestWithData() {
     setUp(() async {
       testData = await DatabaseHelper.setupTestEnvironment();

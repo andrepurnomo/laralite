@@ -5,7 +5,8 @@ import 'package:laralite/laralite.dart';
 /// various Laralite features like relationships, validation, soft deletes, and timestamps.
 
 /// Basic User model with timestamps and soft deletes
-class TestUser extends Model<TestUser> with TimestampsAndSoftDeletesMixin<TestUser> {
+class TestUser extends Model<TestUser>
+    with TimestampsAndSoftDeletesMixin<TestUser> {
   final _id = AutoIncrementField();
   final _name = StringField(required: true, minLength: 2, maxLength: 100);
   final _email = EmailField(unique: true);
@@ -58,7 +59,8 @@ class TestUser extends Model<TestUser> with TimestampsAndSoftDeletesMixin<TestUs
 }
 
 /// Blog Post model with relationships and validation
-class TestPost extends Model<TestPost> with TimestampsAndSoftDeletesMixin<TestPost> {
+class TestPost extends Model<TestPost>
+    with TimestampsAndSoftDeletesMixin<TestPost> {
   final _id = AutoIncrementField();
   final _title = StringField(required: true, minLength: 5, maxLength: 200);
   final _slug = StringField(unique: true, maxLength: 250);
@@ -137,7 +139,8 @@ class TestPost extends Model<TestPost> with TimestampsAndSoftDeletesMixin<TestPo
   // Mutators
   void generateSlug() {
     if (title != null) {
-      slug = title!.toLowerCase()
+      slug = title!
+          .toLowerCase()
           .replaceAll(RegExp(r'[^\w\s-]'), '')
           .replaceAll(RegExp(r'\s+'), '-')
           .replaceAll(RegExp(r'-+'), '-')
@@ -170,7 +173,8 @@ class TestPost extends Model<TestPost> with TimestampsAndSoftDeletesMixin<TestPo
 }
 
 /// Comment model for testing relationships
-class TestComment extends Model<TestComment> with TimestampsAndSoftDeletesMixin<TestComment> {
+class TestComment extends Model<TestComment>
+    with TimestampsAndSoftDeletesMixin<TestComment> {
   final _id = AutoIncrementField();
   final _content = TextField(required: true);
   final _authorId = IntField(required: true);
@@ -229,7 +233,8 @@ class TestComment extends Model<TestComment> with TimestampsAndSoftDeletesMixin<
 }
 
 /// Category model for hierarchical data
-class TestCategory extends Model<TestCategory> with TimestampsMixin<TestCategory> {
+class TestCategory extends Model<TestCategory>
+    with TimestampsMixin<TestCategory> {
   final _id = AutoIncrementField();
   final _name = StringField(required: true, maxLength: 100);
   final _slug = StringField(unique: true, maxLength: 120);
@@ -348,13 +353,13 @@ class TestProduct extends Model<TestProduct> with TimestampsMixin<TestProduct> {
   set tags(List<String>? value) => _tags.value = value;
 
   // Business methods
-  double? get profitMargin => 
+  double? get profitMargin =>
       price != null && costPrice != null ? price! - costPrice! : null;
-  
-  double? get profitMarginPercentage => 
-      price != null && costPrice != null && costPrice! > 0 
-          ? ((price! - costPrice!) / costPrice!) * 100 
-          : null;
+
+  double? get profitMarginPercentage =>
+      price != null && costPrice != null && costPrice! > 0
+      ? ((price! - costPrice!) / costPrice!) * 100
+      : null;
 
   bool get isLowStock => (stockQuantity ?? 0) <= (minStockLevel ?? 0);
   bool get isOutOfStock => (stockQuantity ?? 0) <= 0;
@@ -380,7 +385,8 @@ class TestProduct extends Model<TestProduct> with TimestampsMixin<TestProduct> {
 }
 
 /// Order model for testing relationships and complex scenarios
-class TestOrder extends Model<TestOrder> with TimestampsAndSoftDeletesMixin<TestOrder> {
+class TestOrder extends Model<TestOrder>
+    with TimestampsAndSoftDeletesMixin<TestOrder> {
   final _id = AutoIncrementField();
   final _orderNumber = StringField(unique: true, required: true);
   final _customerId = IntField(required: true);
@@ -444,10 +450,12 @@ class TestOrder extends Model<TestOrder> with TimestampsAndSoftDeletesMixin<Test
   set discountAmount(double? value) => _discountAmount.value = value;
 
   Map<String, dynamic>? get shippingAddress => _shippingAddress.value;
-  set shippingAddress(Map<String, dynamic>? value) => _shippingAddress.value = value;
+  set shippingAddress(Map<String, dynamic>? value) =>
+      _shippingAddress.value = value;
 
   Map<String, dynamic>? get billingAddress => _billingAddress.value;
-  set billingAddress(Map<String, dynamic>? value) => _billingAddress.value = value;
+  set billingAddress(Map<String, dynamic>? value) =>
+      _billingAddress.value = value;
 
   String? get notes => _notes.value;
   set notes(String? value) => _notes.value = value;
@@ -482,8 +490,11 @@ class TestOrder extends Model<TestOrder> with TimestampsAndSoftDeletesMixin<Test
   }
 
   // Calculated properties
-  double get subtotalAmount => 
-      (totalAmount ?? 0) - (shippingCost ?? 0) - (taxAmount ?? 0) + (discountAmount ?? 0);
+  double get subtotalAmount =>
+      (totalAmount ?? 0) -
+      (shippingCost ?? 0) -
+      (taxAmount ?? 0) +
+      (discountAmount ?? 0);
 
   bool get isPending => status == 'pending';
   bool get isProcessing => status == 'processing';

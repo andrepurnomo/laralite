@@ -42,9 +42,14 @@ class PhoneMutator extends Mutator<String, String> {
 class CapitalizeMutator extends Mutator<String, String> {
   @override
   String mutate(String value) {
-    return value.split(' ').map((word) => 
-      word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : word
-    ).join(' ');
+    return value
+        .split(' ')
+        .map(
+          (word) => word.isNotEmpty
+              ? word[0].toUpperCase() + word.substring(1).toLowerCase()
+              : word,
+        )
+        .join(' ');
   }
 }
 
@@ -92,9 +97,9 @@ class DollarsToCentsMutator extends Mutator<double, int> {
 class CurrencyAccessor extends Accessor<double, String> {
   final String symbol;
   final int decimals;
-  
+
   CurrencyAccessor({this.symbol = '\$', this.decimals = 2});
-  
+
   @override
   String access(double value) {
     return '$symbol${value.toStringAsFixed(decimals)}';
@@ -104,9 +109,9 @@ class CurrencyAccessor extends Accessor<double, String> {
 /// Accessor for formatting dates
 class DateAccessor extends Accessor<DateTime, String> {
   final String format;
-  
+
   DateAccessor({this.format = 'yyyy-MM-dd'});
-  
+
   @override
   String access(DateTime value) {
     // Simple date formatting - in real app use intl package
@@ -150,23 +155,23 @@ class MaskAccessor extends Accessor<String, String> {
   final int visibleStart;
   final int visibleEnd;
   final String maskChar;
-  
+
   MaskAccessor({
     this.visibleStart = 0,
     this.visibleEnd = 4,
     this.maskChar = '*',
   });
-  
+
   @override
   String access(String value) {
     if (value.length <= visibleStart + visibleEnd) {
       return value;
     }
-    
+
     final start = value.substring(0, visibleStart);
     final end = value.substring(value.length - visibleEnd);
     final mask = maskChar * (value.length - visibleStart - visibleEnd);
-    
+
     return '$start$mask$end';
   }
 }
@@ -175,40 +180,40 @@ class MaskAccessor extends Accessor<String, String> {
 class MutatorAccessorRegistry {
   /// Map of field name to mutator
   final Map<String, Mutator> _mutators = {};
-  
+
   /// Map of field name to accessor
   final Map<String, Accessor> _accessors = {};
-  
+
   /// Register a mutator for a field
   void registerMutator(String fieldName, Mutator mutator) {
     _mutators[fieldName] = mutator;
   }
-  
+
   /// Register an accessor for a field
   void registerAccessor(String fieldName, Accessor accessor) {
     _accessors[fieldName] = accessor;
   }
-  
+
   /// Get mutator for a field
   Mutator? getMutator(String fieldName) {
     return _mutators[fieldName];
   }
-  
+
   /// Get accessor for a field
   Accessor? getAccessor(String fieldName) {
     return _accessors[fieldName];
   }
-  
+
   /// Check if field has a mutator
   bool hasMutator(String fieldName) {
     return _mutators.containsKey(fieldName);
   }
-  
+
   /// Check if field has an accessor
   bool hasAccessor(String fieldName) {
     return _accessors.containsKey(fieldName);
   }
-  
+
   /// Apply mutator to a value if one exists
   dynamic applyMutator(String fieldName, dynamic value) {
     final mutator = _mutators[fieldName];
@@ -217,7 +222,7 @@ class MutatorAccessorRegistry {
     }
     return value;
   }
-  
+
   /// Apply accessor to a value if one exists
   dynamic applyAccessor(String fieldName, dynamic value) {
     final accessor = _accessors[fieldName];
@@ -226,17 +231,17 @@ class MutatorAccessorRegistry {
     }
     return value;
   }
-  
+
   /// Get all mutator field names
   List<String> getMutatorFields() {
     return _mutators.keys.toList();
   }
-  
+
   /// Get all accessor field names
   List<String> getAccessorFields() {
     return _accessors.keys.toList();
   }
-  
+
   /// Clear all mutators and accessors
   void clear() {
     _mutators.clear();
@@ -247,43 +252,54 @@ class MutatorAccessorRegistry {
 /// Mixin to add mutator/accessor support to models
 mixin MutatorAccessorMixin<T extends Model<T>> on Model<T> {
   /// Registry for mutators and accessors
-  final MutatorAccessorRegistry _mutatorAccessorRegistry = MutatorAccessorRegistry();
-  
+  final MutatorAccessorRegistry _mutatorAccessorRegistry =
+      MutatorAccessorRegistry();
+
   /// Get the mutator/accessor registry
-  MutatorAccessorRegistry get mutatorAccessorRegistry => _mutatorAccessorRegistry;
-  
+  MutatorAccessorRegistry get mutatorAccessorRegistry =>
+      _mutatorAccessorRegistry;
+
   /// Register a mutator for a field
   void registerMutator(String fieldName, Mutator mutator) {
     _mutatorAccessorRegistry.registerMutator(fieldName, mutator);
   }
-  
+
   /// Register an accessor for a field
   void registerAccessor(String fieldName, Accessor accessor) {
     _mutatorAccessorRegistry.registerAccessor(fieldName, accessor);
   }
-  
+
   /// Get value with accessor applied
   TValue? getValueWithAccessor<TValue>(String fieldName) {
     final rawValue = getValue(fieldName);
-    final accessedValue = _mutatorAccessorRegistry.applyAccessor(fieldName, rawValue);
+    final accessedValue = _mutatorAccessorRegistry.applyAccessor(
+      fieldName,
+      rawValue,
+    );
     return accessedValue as TValue?;
   }
-  
+
   /// Set value with mutator applied
   void setValueWithMutator<TValue>(String fieldName, TValue? value) {
-    final mutatedValue = _mutatorAccessorRegistry.applyMutator(fieldName, value);
+    final mutatedValue = _mutatorAccessorRegistry.applyMutator(
+      fieldName,
+      value,
+    );
     setValue(fieldName, mutatedValue);
   }
-  
+
   /// Initialize mutators and accessors (to be overridden by subclasses)
   void initializeMutatorAccessors() {
     // Subclasses can override this to register their mutators and accessors
   }
-  
+
   /// Override setValue to apply mutators automatically
   @override
   void setValue<TValue>(String columnName, TValue? value) {
-    final mutatedValue = _mutatorAccessorRegistry.applyMutator(columnName, value);
+    final mutatedValue = _mutatorAccessorRegistry.applyMutator(
+      columnName,
+      value,
+    );
     super.setValue(columnName, mutatedValue);
   }
 }

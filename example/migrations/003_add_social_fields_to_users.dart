@@ -10,17 +10,17 @@ class AddSocialFieldsToUsers extends Migration {
       table.string('github_username', 100).nullable();
       table.string('linkedin_profile').nullable();
       table.string('website_url').nullable();
-      
+
       // Location information
       table.string('country', 100).nullable();
       table.string('city', 100).nullable();
       table.string('timezone', 50).nullable();
-      
+
       // Additional profile fields
       table.string('avatar_url').nullable();
       table.boolean('is_verified').defaultValue(false);
       table.dateTime('last_login_at').nullable();
-      
+
       // Indexes for social fields
       table.index('twitter_handle');
       table.index('github_username');
@@ -36,7 +36,7 @@ class AddSocialFieldsToUsers extends Migration {
     // or use a more complex migration strategy
     throw UnimplementedError(
       'SQLite does not support dropping columns. '
-      'Consider creating a new migration that recreates the table.'
+      'Consider creating a new migration that recreates the table.',
     );
   }
 }

@@ -432,7 +432,9 @@ class LaraliteGenerator implements Builder {
     buffer.writeln(
       '  QueryBuilder<$className> whereHas<TRelated extends Model<TRelated>>(String relationshipName, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {',
     );
-    buffer.writeln('    return query().whereHas<TRelated>(relationshipName, callback);');
+    buffer.writeln(
+      '    return query().whereHas<TRelated>(relationshipName, callback);',
+    );
     buffer.writeln('  }');
     buffer.writeln();
 
@@ -440,7 +442,9 @@ class LaraliteGenerator implements Builder {
     buffer.writeln(
       '  QueryBuilder<$className> whereDoesntHave<TRelated extends Model<TRelated>>(String relationshipName, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {',
     );
-    buffer.writeln('    return query().whereDoesntHave<TRelated>(relationshipName, callback);');
+    buffer.writeln(
+      '    return query().whereDoesntHave<TRelated>(relationshipName, callback);',
+    );
     buffer.writeln('  }');
     buffer.writeln();
 
@@ -448,7 +452,9 @@ class LaraliteGenerator implements Builder {
     buffer.writeln(
       '  QueryBuilder<$className> whereHasCount<TRelated extends Model<TRelated>>(String relationshipName, String operator, int count, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {',
     );
-    buffer.writeln('    return query().whereHasCount<TRelated>(relationshipName, operator, count, callback);');
+    buffer.writeln(
+      '    return query().whereHasCount<TRelated>(relationshipName, operator, count, callback);',
+    );
     buffer.writeln('  }');
     buffer.writeln();
 

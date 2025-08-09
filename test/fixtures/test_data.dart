@@ -52,21 +52,25 @@ The process varies slightly depending on your operating system.
 Understanding widgets is crucial to Flutter development. Everything in Flutter 
 is a widget, from simple text and buttons to complex layouts and animations.
 ''',
-    'excerpt': 'A comprehensive guide to getting started with Flutter development, covering installation, setup, and key concepts.',
+    'excerpt':
+        'A comprehensive guide to getting started with Flutter development, covering installation, setup, and key concepts.',
     'status': 'published',
     'author_id': 1,
     'category_id': 1,
     'view_count': 150,
     'is_published': true,
     'meta_title': 'Flutter Development Guide - Complete Tutorial',
-    'meta_description': 'Learn Flutter development from scratch with our complete tutorial covering setup, widgets, and best practices.',
+    'meta_description':
+        'Learn Flutter development from scratch with our complete tutorial covering setup, widgets, and best practices.',
   };
 
   static const Map<String, dynamic> draftPostData = {
     'title': 'Advanced State Management in Flutter',
     'slug': 'advanced-state-management-flutter',
-    'content': 'This article covers advanced state management patterns in Flutter...',
-    'excerpt': 'Deep dive into state management solutions for complex Flutter applications.',
+    'content':
+        'This article covers advanced state management patterns in Flutter...',
+    'excerpt':
+        'Deep dive into state management solutions for complex Flutter applications.',
     'status': 'draft',
     'author_id': 1,
     'category_id': 1,
@@ -84,7 +88,8 @@ is a widget, from simple text and buttons to complex layouts and animations.
 
   /// Sample comment data
   static const Map<String, dynamic> validCommentData = {
-    'content': 'Great article! This really helped me understand Flutter widgets better.',
+    'content':
+        'Great article! This really helped me understand Flutter widgets better.',
     'author_id': 2,
     'post_id': 1,
     'is_approved': true,
@@ -93,7 +98,8 @@ is a widget, from simple text and buttons to complex layouts and animations.
   };
 
   static const Map<String, dynamic> pendingCommentData = {
-    'content': 'I have a question about the state management section. Can you elaborate?',
+    'content':
+        'I have a question about the state management section. Can you elaborate?',
     'author_id': 3,
     'post_id': 1,
     'is_approved': false,
@@ -115,7 +121,8 @@ is a widget, from simple text and buttons to complex layouts and animations.
   static const Map<String, dynamic> rootCategoryData = {
     'name': 'Technology',
     'slug': 'technology',
-    'description': 'Articles about technology, programming, and software development.',
+    'description':
+        'Articles about technology, programming, and software development.',
     'sort_order': 1,
     'is_active': true,
   };
@@ -123,7 +130,8 @@ is a widget, from simple text and buttons to complex layouts and animations.
   static const Map<String, dynamic> subCategoryData = {
     'name': 'Mobile Development',
     'slug': 'mobile-development',
-    'description': 'Content related to mobile app development for iOS and Android.',
+    'description':
+        'Content related to mobile app development for iOS and Android.',
     'parent_id': 1,
     'sort_order': 1,
     'is_active': true,
@@ -147,12 +155,7 @@ is a widget, from simple text and buttons to complex layouts and animations.
     'stock_quantity': 50,
     'min_stock_level': 10,
     'is_active': true,
-    'dimensions': {
-      'length': 18.5,
-      'width': 16.0,
-      'height': 8.0,
-      'unit': 'cm'
-    },
+    'dimensions': {'length': 18.5, 'width': 16.0, 'height': 8.0, 'unit': 'cm'},
     'tags': ['electronics', 'audio', 'wireless', 'bluetooth'],
   };
 
@@ -235,7 +238,8 @@ is a widget, from simple text and buttons to complex layouts and animations.
   };
 
   static const Map<String, dynamic> longContentPostData = {
-    'title': 'The Ultimate Guide to Everything You Need to Know About Modern Web Development Practices and Methodologies in 2024',
+    'title':
+        'The Ultimate Guide to Everything You Need to Know About Modern Web Development Practices and Methodologies in 2024',
     'content': '''
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
 incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud 
@@ -258,42 +262,61 @@ voluptatem sequi nesciunt.
 
   /// Bulk data sets for testing performance and pagination
   static List<Map<String, dynamic>> generateBulkUserData(int count) {
-    return List.generate(count, (index) => {
-      'name': 'User ${index + 1}',
-      'email': 'user${index + 1}@example.com',
-      'password': 'password${index + 1}',
-      'status': index % 3 == 0 ? 'inactive' : 'active',
-    });
+    return List.generate(
+      count,
+      (index) => {
+        'name': 'User ${index + 1}',
+        'email': 'user${index + 1}@example.com',
+        'password': 'password${index + 1}',
+        'status': index % 3 == 0 ? 'inactive' : 'active',
+      },
+    );
   }
 
-  static List<Map<String, dynamic>> generateBulkPostData(int count, int authorId) {
-    return List.generate(count, (index) => {
-      'title': 'Blog Post ${index + 1}: Test Article',
-      'slug': 'blog-post-${index + 1}-test-article',
-      'content': 'This is the content for blog post ${index + 1}. Lorem ipsum dolor sit amet.',
-      'excerpt': 'Excerpt for blog post ${index + 1}.',
-      'status': index % 4 == 0 ? 'draft' : 'published',
-      'author_id': authorId,
-      'category_id': (index % 3) + 1,
-      'view_count': index * 10,
-      'is_published': index % 4 != 0,
-    });
+  static List<Map<String, dynamic>> generateBulkPostData(
+    int count,
+    int authorId,
+  ) {
+    return List.generate(
+      count,
+      (index) => {
+        'title': 'Blog Post ${index + 1}: Test Article',
+        'slug': 'blog-post-${index + 1}-test-article',
+        'content':
+            'This is the content for blog post ${index + 1}. Lorem ipsum dolor sit amet.',
+        'excerpt': 'Excerpt for blog post ${index + 1}.',
+        'status': index % 4 == 0 ? 'draft' : 'published',
+        'author_id': authorId,
+        'category_id': (index % 3) + 1,
+        'view_count': index * 10,
+        'is_published': index % 4 != 0,
+      },
+    );
   }
 
   static List<Map<String, dynamic>> generateBulkProductData(int count) {
-    final categories = ['Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports'];
-    
-    return List.generate(count, (index) => {
-      'name': 'Product ${index + 1}',
-      'sku': 'PRD-${(index + 1).toString().padLeft(3, '0')}',
-      'price': 10.0 + (index * 5.5),
-      'cost_price': 5.0 + (index * 2.5),
-      'weight': 100.0 + (index * 10),
-      'stock_quantity': 20 - (index % 25),
-      'min_stock_level': 5,
-      'is_active': index % 10 != 0,
-      'tags': [categories[index % categories.length], 'test-product'],
-    });
+    final categories = [
+      'Electronics',
+      'Clothing',
+      'Books',
+      'Home & Garden',
+      'Sports',
+    ];
+
+    return List.generate(
+      count,
+      (index) => {
+        'name': 'Product ${index + 1}',
+        'sku': 'PRD-${(index + 1).toString().padLeft(3, '0')}',
+        'price': 10.0 + (index * 5.5),
+        'cost_price': 5.0 + (index * 2.5),
+        'weight': 100.0 + (index * 10),
+        'stock_quantity': 20 - (index % 25),
+        'min_stock_level': 5,
+        'is_active': index % 10 != 0,
+        'tags': [categories[index % categories.length], 'test-product'],
+      },
+    );
   }
 
   /// Data for specific test scenarios
@@ -357,18 +380,24 @@ voluptatem sequi nesciunt.
         'id': 1,
         'profile': {
           'name': 'John',
-          'preferences': ['dark_mode', 'notifications']
-        }
-      }
+          'preferences': ['dark_mode', 'notifications'],
+        },
+      },
     },
-    'array_data': [1, 2, 3, 'four', {'five': 5}],
+    'array_data': [
+      1,
+      2,
+      3,
+      'four',
+      {'five': 5},
+    ],
     'mixed_types': {
       'string': 'text',
       'number': 123,
       'boolean': true,
       'null_value': null,
       'array': [1, 2, 3],
-      'object': {'nested': 'value'}
+      'object': {'nested': 'value'},
     },
   };
 
@@ -446,7 +475,10 @@ class TestModelFactory {
   }
 
   /// Create multiple users
-  static List<TestUser> createUsers(int count, [Map<String, dynamic>? baseData]) {
+  static List<TestUser> createUsers(
+    int count, [
+    Map<String, dynamic>? baseData,
+  ]) {
     return List.generate(count, (index) {
       final data = {
         'name': 'User ${index + 1}',
@@ -459,7 +491,11 @@ class TestModelFactory {
   }
 
   /// Create multiple posts
-  static List<TestPost> createPosts(int count, int authorId, [Map<String, dynamic>? baseData]) {
+  static List<TestPost> createPosts(
+    int count,
+    int authorId, [
+    Map<String, dynamic>? baseData,
+  ]) {
     return List.generate(count, (index) {
       final data = {
         'title': 'Test Post ${index + 1}',

@@ -5,7 +5,7 @@ class StringField extends Field<String> {
   final int? maxLength;
   final int? minLength;
   final RegExp? pattern;
-  
+
   StringField({
     this.maxLength,
     this.minLength,
@@ -17,7 +17,7 @@ class StringField extends Field<String> {
     super.columnName,
     super.validationRules = const [],
   });
-  
+
   @override
   String getSqlType() {
     if (maxLength != null) {
@@ -25,7 +25,7 @@ class StringField extends Field<String> {
     }
     return 'TEXT';
   }
-  
+
   @override
   String serializeValue(String? value) {
     if (value == null) return 'NULL';
@@ -33,17 +33,17 @@ class StringField extends Field<String> {
     final escaped = value.replaceAll("'", "''");
     return "'$escaped'";
   }
-  
+
   @override
   String? deserializeValue(dynamic value) {
     if (value == null) return null;
     return value.toString();
   }
-  
+
   @override
   List<String> validateValue(String? value) {
     final errors = <String>[];
-    
+
     if (value != null) {
       if (minLength != null && value.length < minLength!) {
         errors.add('Minimum length is $minLength characters');
@@ -55,7 +55,7 @@ class StringField extends Field<String> {
         errors.add('Value does not match required pattern');
       }
     }
-    
+
     return errors;
   }
 }
@@ -63,7 +63,7 @@ class StringField extends Field<String> {
 /// Large text field for long content
 class TextField extends Field<String> {
   final int? maxLength;
-  
+
   TextField({
     this.maxLength,
     super.required = false,
@@ -73,10 +73,10 @@ class TextField extends Field<String> {
     super.columnName,
     super.validationRules = const [],
   });
-  
+
   @override
   String getSqlType() => 'TEXT';
-  
+
   @override
   String serializeValue(String? value) {
     if (value == null) return 'NULL';
@@ -84,21 +84,21 @@ class TextField extends Field<String> {
     final escaped = value.replaceAll("'", "''");
     return "'$escaped'";
   }
-  
+
   @override
   String? deserializeValue(dynamic value) {
     if (value == null) return null;
     return value.toString();
   }
-  
+
   @override
   List<String> validateValue(String? value) {
     final errors = <String>[];
-    
+
     if (value != null && maxLength != null && value.length > maxLength!) {
       errors.add('Maximum length is $maxLength characters');
     }
-    
+
     return errors;
   }
 }
@@ -106,9 +106,9 @@ class TextField extends Field<String> {
 /// Email field with built-in validation
 class EmailField extends StringField {
   static final RegExp _emailPattern = RegExp(
-    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
   );
-  
+
   EmailField({
     super.maxLength = 255,
     super.required = false,
@@ -118,15 +118,15 @@ class EmailField extends StringField {
     super.columnName,
     super.validationRules = const [],
   }) : super(pattern: _emailPattern);
-  
+
   @override
   List<String> validateValue(String? value) {
     final errors = super.validateValue(value);
-    
+
     if (value != null && value.isNotEmpty && !_emailPattern.hasMatch(value)) {
       errors.add('Please enter a valid email address');
     }
-    
+
     return errors;
   }
 }
@@ -134,9 +134,9 @@ class EmailField extends StringField {
 /// URL field with built-in validation
 class UrlField extends StringField {
   static final RegExp _urlPattern = RegExp(
-    r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$'
+    r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$',
   );
-  
+
   UrlField({
     super.maxLength = 2048,
     super.required = false,
@@ -146,15 +146,15 @@ class UrlField extends StringField {
     super.columnName,
     super.validationRules = const [],
   }) : super(pattern: _urlPattern);
-  
+
   @override
   List<String> validateValue(String? value) {
     final errors = super.validateValue(value);
-    
+
     if (value != null && value.isNotEmpty && !_urlPattern.hasMatch(value)) {
       errors.add('Please enter a valid URL');
     }
-    
+
     return errors;
   }
 }
@@ -162,7 +162,7 @@ class UrlField extends StringField {
 /// Binary data field
 class BlobField extends Field<List<int>> {
   final int? maxSize;
-  
+
   BlobField({
     this.maxSize,
     super.required = false,
@@ -172,10 +172,10 @@ class BlobField extends Field<List<int>> {
     super.columnName,
     super.validationRules = const [],
   });
-  
+
   @override
   String getSqlType() => 'BLOB';
-  
+
   @override
   String serializeValue(List<int>? value) {
     if (value == null) return 'NULL';
@@ -183,7 +183,7 @@ class BlobField extends Field<List<int>> {
     final hex = value.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
     return "X'$hex'";
   }
-  
+
   @override
   List<int>? deserializeValue(dynamic value) {
     if (value == null) return null;
@@ -199,15 +199,15 @@ class BlobField extends Field<List<int>> {
     }
     return null;
   }
-  
+
   @override
   List<String> validateValue(List<int>? value) {
     final errors = <String>[];
-    
+
     if (value != null && maxSize != null && value.length > maxSize!) {
       errors.add('Maximum size is $maxSize bytes');
     }
-    
+
     return errors;
   }
 }

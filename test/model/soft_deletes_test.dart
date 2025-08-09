@@ -631,12 +631,16 @@ void main() {
         final allUsers = await Model.all<FullFeatureUser>(
           () => FullFeatureUser(),
         );
-        expect(allUsers, hasLength(0)); // Should be empty since user was soft deleted
+        expect(
+          allUsers,
+          hasLength(0),
+        ); // Should be empty since user was soft deleted
 
         // Verify the user still exists with withTrashed
-        final withTrashedUsers = await SoftDeletesMixin.withTrashed<FullFeatureUser>(
-          () => FullFeatureUser(),
-        ).get();
+        final withTrashedUsers =
+            await SoftDeletesMixin.withTrashed<FullFeatureUser>(
+              () => FullFeatureUser(),
+            ).get();
         expect(withTrashedUsers, hasLength(1));
         expect(withTrashedUsers.first.isTrashed, isTrue);
 
@@ -942,7 +946,9 @@ void main() {
         final posts = await Model.all<TestPost>(() => TestPost());
         expect(
           posts.where((p) => p.authorId == blogScenario.author.id),
-          hasLength(2), // createBlogScenario creates 2 posts (published + draft)
+          hasLength(
+            2,
+          ), // createBlogScenario creates 2 posts (published + draft)
         );
       });
     });

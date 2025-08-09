@@ -8,7 +8,8 @@ abstract class Scope<T extends Model<T>> {
 }
 
 /// Local scope - a function that modifies the query
-typedef LocalScope<T extends Model<T>> = QueryBuilder<T> Function(QueryBuilder<T> query);
+typedef LocalScope<T extends Model<T>> =
+    QueryBuilder<T> Function(QueryBuilder<T> query);
 
 /// Global scope - automatically applied to all queries for a model
 abstract class GlobalScope<T extends Model<T>> extends Scope<T> {
@@ -20,30 +21,30 @@ abstract class GlobalScope<T extends Model<T>> extends Scope<T> {
 class ScopeRegistry<T extends Model<T>> {
   /// Local scopes registered by name
   final Map<String, LocalScope<T>> _localScopes = {};
-  
+
   /// Global scopes
   final List<GlobalScope<T>> _globalScopes = [];
-  
+
   /// Register a local scope
   void registerLocal(String name, LocalScope<T> scope) {
     _localScopes[name] = scope;
   }
-  
+
   /// Register a global scope
   void registerGlobal(GlobalScope<T> scope) {
     _globalScopes.add(scope);
   }
-  
+
   /// Get a local scope by name
   LocalScope<T>? getLocal(String name) {
     return _localScopes[name];
   }
-  
+
   /// Get all global scopes
   List<GlobalScope<T>> getGlobalScopes() {
     return List.unmodifiable(_globalScopes);
   }
-  
+
   /// Apply all global scopes to a query
   QueryBuilder<T> applyGlobalScopes(QueryBuilder<T> query) {
     QueryBuilder<T> result = query;
@@ -54,7 +55,7 @@ class ScopeRegistry<T extends Model<T>> {
     }
     return result;
   }
-  
+
   /// Apply a local scope to a query
   QueryBuilder<T> applyLocalScope(QueryBuilder<T> query, String scopeName) {
     final scope = _localScopes[scopeName];
@@ -63,12 +64,12 @@ class ScopeRegistry<T extends Model<T>> {
     }
     return query;
   }
-  
+
   /// Check if a local scope exists
   bool hasLocalScope(String name) {
     return _localScopes.containsKey(name);
   }
-  
+
   /// Get all local scope names
   List<String> getLocalScopeNames() {
     return _localScopes.keys.toList();
@@ -81,9 +82,9 @@ class ScopeRegistry<T extends Model<T>> {
 class ActiveScope<T extends Model<T>> extends GlobalScope<T> {
   final String activeColumn;
   final dynamic activeValue;
-  
+
   ActiveScope({this.activeColumn = 'active', this.activeValue = true});
-  
+
   @override
   QueryBuilder<T> apply(QueryBuilder<T> query) {
     return query.where(activeColumn, activeValue);
@@ -93,15 +94,15 @@ class ActiveScope<T extends Model<T>> extends GlobalScope<T> {
 /// Soft delete scope - excludes soft deleted records
 class SoftDeleteScope<T extends Model<T>> extends GlobalScope<T> {
   final String deletedAtColumn;
-  
+
   SoftDeleteScope({this.deletedAtColumn = 'deleted_at'});
-  
+
   @override
   bool shouldApply(QueryBuilder<T> query) {
     // Don't apply soft delete scope if withTrashed() was called
     return !query.includesTrashed;
   }
-  
+
   @override
   QueryBuilder<T> apply(QueryBuilder<T> query) {
     return query.whereNull(deletedAtColumn);
@@ -112,9 +113,12 @@ class SoftDeleteScope<T extends Model<T>> extends GlobalScope<T> {
 class PublishedScope<T extends Model<T>> extends GlobalScope<T> {
   final String publishedColumn;
   final dynamic publishedValue;
-  
-  PublishedScope({this.publishedColumn = 'published', this.publishedValue = true});
-  
+
+  PublishedScope({
+    this.publishedColumn = 'published',
+    this.publishedValue = true,
+  });
+
   @override
   QueryBuilder<T> apply(QueryBuilder<T> query) {
     return query.where(publishedColumn, publishedValue);
@@ -124,9 +128,9 @@ class PublishedScope<T extends Model<T>> extends GlobalScope<T> {
 /// Recent scope - orders by creation date (most recent first)
 class RecentScope<T extends Model<T>> extends Scope<T> {
   final String createdAtColumn;
-  
+
   RecentScope({this.createdAtColumn = 'created_at'});
-  
+
   @override
   QueryBuilder<T> apply(QueryBuilder<T> query) {
     return query.orderByDesc(createdAtColumn);
@@ -136,9 +140,9 @@ class RecentScope<T extends Model<T>> extends Scope<T> {
 /// Popular scope - orders by a popularity field
 class PopularScope<T extends Model<T>> extends Scope<T> {
   final String popularityColumn;
-  
+
   PopularScope({this.popularityColumn = 'view_count'});
-  
+
   @override
   QueryBuilder<T> apply(QueryBuilder<T> query) {
     return query.orderByDesc(popularityColumn);
@@ -153,12 +157,19 @@ LocalScope<T> whereScope<T extends Model<T>>(String column, dynamic value) {
 }
 
 /// Create a scope for filtering by date range
-LocalScope<T> dateRangeScope<T extends Model<T>>(String column, DateTime start, DateTime end) {
+LocalScope<T> dateRangeScope<T extends Model<T>>(
+  String column,
+  DateTime start,
+  DateTime end,
+) {
   return (query) => query.where(column, '>=', start).where(column, '<=', end);
 }
 
 /// Create a scope for searching by text
-LocalScope<T> searchScope<T extends Model<T>>(String column, String searchTerm) {
+LocalScope<T> searchScope<T extends Model<T>>(
+  String column,
+  String searchTerm,
+) {
   return (query) => query.where(column, 'LIKE', '%$searchTerm%');
 }
 

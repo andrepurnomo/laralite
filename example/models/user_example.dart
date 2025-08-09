@@ -31,14 +31,11 @@ class User extends Model<User> with _$UserFields {
   }
 
   BelongsToMany<Role> roles() {
-    return belongsToMany<Role>(
-      () => Role(),
-      pivotTable: 'user_roles',
-    );
+    return belongsToMany<Role>(() => Role(), pivotTable: 'user_roles');
   }
 }
 
-@laralite  
+@laralite
 class Post extends Model<Post> with _$PostFields {
   @override
   String get table => 'posts';
@@ -113,9 +110,6 @@ class Role extends Model<Role> with _$RoleFields {
 
   // Relationships
   BelongsToMany<User> users() {
-    return belongsToMany<User>(
-      () => User(),
-      pivotTable: 'user_roles',
-    );
+    return belongsToMany<User>(() => User(), pivotTable: 'user_roles');
   }
 }

@@ -7,16 +7,22 @@ part of 'post.dart';
 extension _$PostFieldAccess on Post {
   /// Get id field for registration
   Field get idFieldRef => _id;
+
   /// Get title field for registration
   Field get titleFieldRef => _title;
+
   /// Get content field for registration
   Field get contentFieldRef => _content;
+
   /// Get userId field for registration
   Field get userIdFieldRef => _userId;
+
   /// Get publishedAt field for registration
   Field get publishedAtFieldRef => _publishedAt;
+
   /// Get createdAt field for registration
   Field get createdAtFieldRef => _createdAt;
+
   /// Get updatedAt field for registration
   Field get updatedAtFieldRef => _updatedAt;
 }
@@ -158,7 +164,9 @@ mixin _$PostFields on Model<Post> {
   }
 
   /// Apply scope callback
-  QueryBuilder<Post> scope(QueryBuilder<Post> Function(QueryBuilder<Post>) callback) {
+  QueryBuilder<Post> scope(
+    QueryBuilder<Post> Function(QueryBuilder<Post>) callback,
+  ) {
     return query().scope(callback);
   }
 
@@ -198,23 +206,42 @@ mixin _$PostFields on Model<Post> {
   }
 
   /// Apply conditional query logic
-  QueryBuilder<Post> when(bool condition, QueryBuilder<Post> Function(QueryBuilder<Post>) callback) {
+  QueryBuilder<Post> when(
+    bool condition,
+    QueryBuilder<Post> Function(QueryBuilder<Post>) callback,
+  ) {
     return query().when(condition, callback);
   }
 
   /// Add WHERE EXISTS condition with relationship
-  QueryBuilder<Post> whereHas<TRelated extends Model<TRelated>>(String relationshipName, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {
+  QueryBuilder<Post> whereHas<TRelated extends Model<TRelated>>(
+    String relationshipName, [
+    QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback,
+  ]) {
     return query().whereHas<TRelated>(relationshipName, callback);
   }
 
   /// Add WHERE NOT EXISTS condition with relationship
-  QueryBuilder<Post> whereDoesntHave<TRelated extends Model<TRelated>>(String relationshipName, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {
+  QueryBuilder<Post> whereDoesntHave<TRelated extends Model<TRelated>>(
+    String relationshipName, [
+    QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback,
+  ]) {
     return query().whereDoesntHave<TRelated>(relationshipName, callback);
   }
 
   /// Add WHERE condition for relationship count
-  QueryBuilder<Post> whereHasCount<TRelated extends Model<TRelated>>(String relationshipName, String operator, int count, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {
-    return query().whereHasCount<TRelated>(relationshipName, operator, count, callback);
+  QueryBuilder<Post> whereHasCount<TRelated extends Model<TRelated>>(
+    String relationshipName,
+    String operator,
+    int count, [
+    QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback,
+  ]) {
+    return query().whereHasCount<TRelated>(
+      relationshipName,
+      operator,
+      count,
+      callback,
+    );
   }
 
   /// Include soft deleted records in query
@@ -258,7 +285,11 @@ mixin _$PostFields on Model<Post> {
   }
 
   /// Add OR WHERE condition
-  QueryBuilder<Post> orWhere(String fieldRef, dynamic operator, [dynamic value]) {
+  QueryBuilder<Post> orWhere(
+    String fieldRef,
+    dynamic operator, [
+    dynamic value,
+  ]) {
     return query().orWhere(fieldRef, operator, value);
   }
 
@@ -286,7 +317,6 @@ mixin _$PostFields on Model<Post> {
   QueryBuilder<Post> orWhereBetween(String fieldRef, dynamic min, dynamic max) {
     return query().orWhereBetween(fieldRef, min, max);
   }
-
 }
 
 /// Type-safe field references for Post queries
@@ -300,4 +330,3 @@ abstract class PostFields {
   static const createdAt = 'created_at';
   static const updatedAt = 'updated_at';
 }
-

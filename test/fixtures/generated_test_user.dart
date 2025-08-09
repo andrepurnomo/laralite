@@ -3,8 +3,9 @@ import 'package:laralite/laralite.dart';
 part 'generated_test_user.g.dart';
 
 /// Test user model using @laralite annotation for code generation
-@laralite  
-class GeneratedTestUser extends Model<GeneratedTestUser> with _$GeneratedTestUserFields {
+@laralite
+class GeneratedTestUser extends Model<GeneratedTestUser>
+    with _$GeneratedTestUserFields {
   // Field definitions - will auto-generate getters/setters via generator
   final _id = AutoIncrementField();
   final _name = StringField(required: true, minLength: 2, maxLength: 100);

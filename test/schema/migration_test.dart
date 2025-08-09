@@ -29,7 +29,7 @@ class CreatePostsTableMigration extends Migration {
       table.text('content');
       table.foreignId('user_id').notNull();
       table.timestamps();
-      
+
       table.foreign('user_id', 'users.id');
     });
   }
@@ -82,20 +82,23 @@ void main() {
     group('MigrationRunner', () {
       test('runs single migration successfully', () async {
         final migration = CreateUsersTableMigration();
-        
+
         expect(await Schema.hasTable('users'), isFalse);
-        
+
         await MigrationRunner.runMigration(migration);
-        
+
         expect(await Schema.hasTable('users'), isTrue);
-        expect(await MigrationRunner.hasRun('CreateUsersTableMigration'), isTrue);
+        expect(
+          await MigrationRunner.hasRun('CreateUsersTableMigration'),
+          isTrue,
+        );
       });
 
       test('prevents running same migration twice', () async {
         final migration = CreateUsersTableMigration();
-        
+
         await MigrationRunner.runMigration(migration);
-        
+
         expect(
           () => MigrationRunner.runMigration(migration),
           throwsA(isA<StateError>()),
@@ -104,20 +107,23 @@ void main() {
 
       test('rollback migration successfully', () async {
         final migration = CreateUsersTableMigration();
-        
+
         // Run migration
         await MigrationRunner.runMigration(migration);
         expect(await Schema.hasTable('users'), isTrue);
-        
+
         // Rollback migration
         await MigrationRunner.rollbackMigration(migration);
         expect(await Schema.hasTable('users'), isFalse);
-        expect(await MigrationRunner.hasRun('CreateUsersTableMigration'), isFalse);
+        expect(
+          await MigrationRunner.hasRun('CreateUsersTableMigration'),
+          isFalse,
+        );
       });
 
       test('prevents rolling back non-existent migration', () async {
         final migration = CreateUsersTableMigration();
-        
+
         expect(
           () => MigrationRunner.rollbackMigration(migration),
           throwsA(isA<StateError>()),
@@ -127,20 +133,26 @@ void main() {
       test('runs multiple migrations in order', () async {
         final usersMigration = CreateUsersTableMigration();
         final postsMigration = CreatePostsTableMigration();
-        
+
         await MigrationRunner.runMigrations([usersMigration, postsMigration]);
-        
+
         expect(await Schema.hasTable('users'), isTrue);
         expect(await Schema.hasTable('posts'), isTrue);
-        expect(await MigrationRunner.hasRun('CreateUsersTableMigration'), isTrue);
-        expect(await MigrationRunner.hasRun('CreatePostsTableMigration'), isTrue);
+        expect(
+          await MigrationRunner.hasRun('CreateUsersTableMigration'),
+          isTrue,
+        );
+        expect(
+          await MigrationRunner.hasRun('CreatePostsTableMigration'),
+          isTrue,
+        );
       });
 
       test('migration status tracking', () async {
         final migration = CreateUsersTableMigration();
-        
+
         await MigrationRunner.runMigration(migration);
-        
+
         final status = await MigrationRunner.getStatus();
         expect(status.length, equals(1));
         expect(status.first['migration'], equals('CreateUsersTableMigration'));
@@ -150,11 +162,11 @@ void main() {
 
       test('migration table is created automatically', () async {
         final migration = CreateUsersTableMigration();
-        
+
         await MigrationRunner.runMigration(migration);
-        
+
         expect(await Schema.hasTable('migrations'), isTrue);
-        
+
         final columns = await Schema.getColumnListing('migrations');
         final columnNames = columns.map((c) => c['name']).toList();
         expect(columnNames, contains('id'));
@@ -165,10 +177,10 @@ void main() {
 
       test('reset clears migration history', () async {
         final migration = CreateUsersTableMigration();
-        
+
         await MigrationRunner.runMigration(migration);
         expect(await Schema.hasTable('migrations'), isTrue);
-        
+
         await MigrationRunner.reset();
         expect(await Schema.hasTable('migrations'), isFalse);
       });
@@ -176,19 +188,19 @@ void main() {
       test('fresh runs all migrations after reset', () async {
         final usersMigration = CreateUsersTableMigration();
         final postsMigration = CreatePostsTableMigration();
-        
+
         // Run initial migration
         await MigrationRunner.runMigration(usersMigration);
-        
+
         // Fresh should reset and run all (with cleanup)
         await MigrationRunner.freshWithCleanup(
           [usersMigration, postsMigration],
           tablesToDrop: ['users', 'posts'],
         );
-        
+
         expect(await Schema.hasTable('users'), isTrue);
         expect(await Schema.hasTable('posts'), isTrue);
-        
+
         final status = await MigrationRunner.getStatus();
         expect(status.length, equals(2));
       });
@@ -196,12 +208,12 @@ void main() {
       test('handles migration errors with rollback', () async {
         // Create a migration that will fail
         final badMigration = _BadMigration();
-        
+
         expect(
           () => MigrationRunner.runMigration(badMigration),
           throwsException,
         );
-        
+
         // Migration should not be recorded on failure
         expect(await MigrationRunner.hasRun('_BadMigration'), isFalse);
       });
@@ -211,10 +223,10 @@ void main() {
       test('registers and retrieves migrations', () {
         final migration1 = CreateUsersTableMigration();
         final migration2 = CreatePostsTableMigration();
-        
+
         MigrationRegistry.register(migration1);
         MigrationRegistry.register(migration2);
-        
+
         final all = MigrationRegistry.all;
         expect(all.length, equals(2));
         expect(all, contains(migration1));
@@ -224,10 +236,10 @@ void main() {
       test('gets migration by name', () {
         final migration = CreateUsersTableMigration();
         MigrationRegistry.register(migration);
-        
+
         final found = MigrationRegistry.getByName('CreateUsersTableMigration');
         expect(found, equals(migration));
-        
+
         final notFound = MigrationRegistry.getByName('NonExistentMigration');
         expect(notFound, isNull);
       });
@@ -235,12 +247,12 @@ void main() {
       test('runs all registered migrations', () async {
         final migration1 = CreateUsersTableMigration();
         final migration2 = CreatePostsTableMigration();
-        
+
         MigrationRegistry.register(migration1);
         MigrationRegistry.register(migration2);
-        
+
         await MigrationRegistry.runAll();
-        
+
         expect(await Schema.hasTable('users'), isTrue);
         expect(await Schema.hasTable('posts'), isTrue);
       });
@@ -249,14 +261,14 @@ void main() {
         final migration1 = CreateUsersTableMigration();
         final migration2 = CreatePostsTableMigration();
         final migration3 = AddAgeToUsersTableMigration();
-        
+
         MigrationRegistry.register(migration1);
         MigrationRegistry.register(migration2);
         MigrationRegistry.register(migration3);
-        
+
         // Run only first migration
         await MigrationRunner.runMigration(migration1);
-        
+
         final pending = await MigrationRegistry.getPending();
         expect(pending.length, equals(2));
         expect(pending, contains(migration2));
@@ -267,9 +279,9 @@ void main() {
       test('clears registry', () {
         final migration = CreateUsersTableMigration();
         MigrationRegistry.register(migration);
-        
+
         expect(MigrationRegistry.all.length, equals(1));
-        
+
         MigrationRegistry.clear();
         expect(MigrationRegistry.all.length, equals(0));
       });
@@ -279,24 +291,24 @@ void main() {
       test('sequential table creation with dependencies', () async {
         final usersMigration = CreateUsersTableMigration();
         final postsMigration = CreatePostsTableMigration();
-        
+
         await MigrationRunner.runMigrations([usersMigration, postsMigration]);
-        
+
         // Test that we can actually use the tables with foreign keys
         await Database.execute(
           'INSERT INTO users (name, email) VALUES (?, ?)',
           ['John Doe', 'john@example.com'],
         );
-        
+
         await Database.execute(
           'INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)',
           ['Test Post', 'This is a test post', 1],
         );
-        
+
         final posts = await Database.query(
           'SELECT p.*, u.name as author_name FROM posts p JOIN users u ON p.user_id = u.id',
         );
-        
+
         expect(posts.length, equals(1));
         expect(posts.first['title'], equals('Test Post'));
         expect(posts.first['author_name'], equals('John Doe'));
@@ -305,20 +317,23 @@ void main() {
       test('table alteration migration', () async {
         // Create initial table
         await MigrationRunner.runMigration(CreateUsersTableMigration());
-        
+
         // Add column
         await MigrationRunner.runMigration(AddAgeToUsersTableMigration());
-        
+
         // Verify new column exists
         expect(await Schema.hasColumn('users', 'age'), isTrue);
-        
+
         // Test inserting data with new column
         await Database.execute(
           'INSERT INTO users (name, email, age) VALUES (?, ?, ?)',
           ['Jane Doe', 'jane@example.com', 30],
         );
-        
-        final result = await Database.query('SELECT * FROM users WHERE name = ?', ['Jane Doe']);
+
+        final result = await Database.query(
+          'SELECT * FROM users WHERE name = ?',
+          ['Jane Doe'],
+        );
         expect(result.first['age'], equals(30));
       });
     });

@@ -13,7 +13,7 @@ void main() {
     group('Database Test Mixin Example', () {
       // Use the mixin for automatic database setup
       late TestDataSeeds testData;
-      
+
       setUp(() async {
         await DatabaseHelper.initializeTestDatabase();
         await DatabaseHelper.createAllTestTables();
@@ -30,7 +30,7 @@ void main() {
         expect(testData.users, hasLength(3));
         expect(testData.posts, hasLength(2));
         expect(testData.comments, hasLength(2));
-        
+
         // Use the convenience getters
         expect(testData.primaryUser.name, equals('John Doe'));
         expect(testData.publishedPost.isPublished, isTrue);
@@ -157,9 +157,7 @@ void main() {
         // Create posts for each user
         final allPosts = <TestPost>[];
         for (final user in users) {
-          final posts = await Factory.post()
-              .withAuthor(user.id!)
-              .createMany(3);
+          final posts = await Factory.post().withAuthor(user.id!).createMany(3);
           allPosts.addAll(posts);
         }
 
@@ -190,15 +188,30 @@ void main() {
         // Test convenience getters
         expect(blogScenario.rootCategory.isRootCategory, isTrue);
         expect(blogScenario.subCategory.isSubCategory, isTrue);
-        expect(blogScenario.subCategory.parentId, equals(blogScenario.rootCategory.id));
+        expect(
+          blogScenario.subCategory.parentId,
+          equals(blogScenario.rootCategory.id),
+        );
 
         // Test post relationships
-        expect(blogScenario.publishedPost.authorId, equals(blogScenario.author.id));
-        expect(blogScenario.publishedPost.categoryId, equals(blogScenario.subCategory.id));
+        expect(
+          blogScenario.publishedPost.authorId,
+          equals(blogScenario.author.id),
+        );
+        expect(
+          blogScenario.publishedPost.categoryId,
+          equals(blogScenario.subCategory.id),
+        );
 
         // Test comment relationships
-        expect(blogScenario.topComment.postId, equals(blogScenario.publishedPost.id));
-        expect(blogScenario.replyComment.parentId, equals(blogScenario.topComment.id));
+        expect(
+          blogScenario.topComment.postId,
+          equals(blogScenario.publishedPost.id),
+        );
+        expect(
+          blogScenario.replyComment.parentId,
+          equals(blogScenario.topComment.id),
+        );
       });
 
       test('should create e-commerce scenario', () async {
@@ -209,7 +222,10 @@ void main() {
         expect(ecommerceScenario.orders, hasLength(2));
 
         // Test product variations
-        expect(ecommerceScenario.expensiveProduct.price, greaterThan(ecommerceScenario.cheapProduct.price ?? 0));
+        expect(
+          ecommerceScenario.expensiveProduct.price,
+          greaterThan(ecommerceScenario.cheapProduct.price ?? 0),
+        );
         expect(ecommerceScenario.expensiveProduct.isInStock, isTrue);
         expect(ecommerceScenario.cheapProduct.isLowStock, isTrue);
 
@@ -273,9 +289,11 @@ void main() {
 
       test('should validate with invalid test data', () {
         // Test validation with invalid data
-        final invalidUser = TestModelFactory.createUser(TestData.invalidUserData);
+        final invalidUser = TestModelFactory.createUser(
+          TestData.invalidUserData,
+        );
         final validationResult = invalidUser.validate();
-        
+
         expect(validationResult.isValid, isFalse);
         expect(validationResult.errors, isNotEmpty);
       });
@@ -330,7 +348,7 @@ void main() {
       test('should test with large dataset', () async {
         // Create a large number of test records
         const recordCount = 1000;
-        
+
         final users = await Factory.user().createMany(recordCount);
         expect(users, hasLength(recordCount));
 

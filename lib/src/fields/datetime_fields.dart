@@ -4,10 +4,10 @@ import 'field.dart';
 class DateTimeField extends Field<DateTime> {
   /// Whether to store only date (no time component)
   final bool dateOnly;
-  
+
   /// Whether to store only time (no date component)
   final bool timeOnly;
-  
+
   DateTimeField({
     this.dateOnly = false,
     this.timeOnly = false,
@@ -18,14 +18,14 @@ class DateTimeField extends Field<DateTime> {
     super.columnName,
     super.validationRules = const [],
   });
-  
+
   @override
   String getSqlType() => 'TEXT'; // Store as ISO 8601 string
-  
+
   @override
   String serializeValue(DateTime? value) {
     if (value == null) return 'NULL';
-    
+
     if (dateOnly) {
       // Always store dates in UTC
       final utcValue = value.toUtc();
@@ -40,12 +40,12 @@ class DateTimeField extends Field<DateTime> {
       return "'${utcValue.toIso8601String()}'";
     }
   }
-  
+
   @override
   DateTime? deserializeValue(dynamic value) {
     if (value == null) return null;
     if (value is DateTime) return value.toLocal();
-    
+
     if (value is String) {
       try {
         if (dateOnly) {
@@ -61,7 +61,7 @@ class DateTimeField extends Field<DateTime> {
           final time = DateTime.parse('1970-01-01T$timeStr');
           return DateTime(
             today.year,
-            today.month, 
+            today.month,
             today.day,
             time.hour,
             time.minute,
@@ -76,17 +76,17 @@ class DateTimeField extends Field<DateTime> {
         return null;
       }
     }
-    
+
     return null;
   }
-  
+
   @override
   List<String> validateValue(DateTime? value) {
     final errors = <String>[];
-    
+
     // Add any datetime-specific validation here
     // For example, future date validation, business hours, etc.
-    
+
     return errors;
   }
 }
@@ -95,10 +95,10 @@ class DateTimeField extends Field<DateTime> {
 class TimestampField extends DateTimeField {
   /// Whether to automatically set value on creation
   final bool autoCreate;
-  
+
   /// Whether to automatically update value on modification
   final bool autoUpdate;
-  
+
   TimestampField({
     this.autoCreate = false,
     this.autoUpdate = false,
@@ -111,14 +111,14 @@ class TimestampField extends DateTimeField {
     super.columnName,
     super.validationRules = const [],
   });
-  
+
   /// Update timestamp if auto-update is enabled
   void touchIfAutoUpdate() {
     if (autoUpdate) {
       value = DateTime.now();
     }
   }
-  
+
   /// Set timestamp if auto-create is enabled and value is null
   void touchIfAutoCreate() {
     if (autoCreate && value == null) {

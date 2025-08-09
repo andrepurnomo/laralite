@@ -7,16 +7,22 @@ part of 'comment.dart';
 extension _$CommentFieldAccess on Comment {
   /// Get id field for registration
   Field get idFieldRef => _id;
+
   /// Get content field for registration
   Field get contentFieldRef => _content;
+
   /// Get userId field for registration
   Field get userIdFieldRef => _userId;
+
   /// Get postId field for registration
   Field get postIdFieldRef => _postId;
+
   /// Get approved field for registration
   Field get approvedFieldRef => _approved;
+
   /// Get createdAt field for registration
   Field get createdAtFieldRef => _createdAt;
+
   /// Get updatedAt field for registration
   Field get updatedAtFieldRef => _updatedAt;
 }
@@ -88,7 +94,11 @@ mixin _$CommentFields on Model<Comment> {
   }
 
   /// Add WHERE condition using type-safe field reference
-  QueryBuilder<Comment> where(String fieldRef, dynamic operator, [dynamic value]) {
+  QueryBuilder<Comment> where(
+    String fieldRef,
+    dynamic operator, [
+    dynamic value,
+  ]) {
     return query().where(fieldRef, operator, value);
   }
 
@@ -113,7 +123,11 @@ mixin _$CommentFields on Model<Comment> {
   }
 
   /// Add WHERE BETWEEN condition using type-safe field reference
-  QueryBuilder<Comment> whereBetween(String fieldRef, dynamic min, dynamic max) {
+  QueryBuilder<Comment> whereBetween(
+    String fieldRef,
+    dynamic min,
+    dynamic max,
+  ) {
     return query().whereBetween(fieldRef, min, max);
   }
 
@@ -158,7 +172,9 @@ mixin _$CommentFields on Model<Comment> {
   }
 
   /// Apply scope callback
-  QueryBuilder<Comment> scope(QueryBuilder<Comment> Function(QueryBuilder<Comment>) callback) {
+  QueryBuilder<Comment> scope(
+    QueryBuilder<Comment> Function(QueryBuilder<Comment>) callback,
+  ) {
     return query().scope(callback);
   }
 
@@ -198,23 +214,42 @@ mixin _$CommentFields on Model<Comment> {
   }
 
   /// Apply conditional query logic
-  QueryBuilder<Comment> when(bool condition, QueryBuilder<Comment> Function(QueryBuilder<Comment>) callback) {
+  QueryBuilder<Comment> when(
+    bool condition,
+    QueryBuilder<Comment> Function(QueryBuilder<Comment>) callback,
+  ) {
     return query().when(condition, callback);
   }
 
   /// Add WHERE EXISTS condition with relationship
-  QueryBuilder<Comment> whereHas<TRelated extends Model<TRelated>>(String relationshipName, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {
+  QueryBuilder<Comment> whereHas<TRelated extends Model<TRelated>>(
+    String relationshipName, [
+    QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback,
+  ]) {
     return query().whereHas<TRelated>(relationshipName, callback);
   }
 
   /// Add WHERE NOT EXISTS condition with relationship
-  QueryBuilder<Comment> whereDoesntHave<TRelated extends Model<TRelated>>(String relationshipName, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {
+  QueryBuilder<Comment> whereDoesntHave<TRelated extends Model<TRelated>>(
+    String relationshipName, [
+    QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback,
+  ]) {
     return query().whereDoesntHave<TRelated>(relationshipName, callback);
   }
 
   /// Add WHERE condition for relationship count
-  QueryBuilder<Comment> whereHasCount<TRelated extends Model<TRelated>>(String relationshipName, String operator, int count, [QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback]) {
-    return query().whereHasCount<TRelated>(relationshipName, operator, count, callback);
+  QueryBuilder<Comment> whereHasCount<TRelated extends Model<TRelated>>(
+    String relationshipName,
+    String operator,
+    int count, [
+    QueryBuilder<TRelated> Function(QueryBuilder<TRelated>)? callback,
+  ]) {
+    return query().whereHasCount<TRelated>(
+      relationshipName,
+      operator,
+      count,
+      callback,
+    );
   }
 
   /// Include soft deleted records in query
@@ -258,7 +293,11 @@ mixin _$CommentFields on Model<Comment> {
   }
 
   /// Add OR WHERE condition
-  QueryBuilder<Comment> orWhere(String fieldRef, dynamic operator, [dynamic value]) {
+  QueryBuilder<Comment> orWhere(
+    String fieldRef,
+    dynamic operator, [
+    dynamic value,
+  ]) {
     return query().orWhere(fieldRef, operator, value);
   }
 
@@ -283,10 +322,13 @@ mixin _$CommentFields on Model<Comment> {
   }
 
   /// Add OR WHERE BETWEEN condition
-  QueryBuilder<Comment> orWhereBetween(String fieldRef, dynamic min, dynamic max) {
+  QueryBuilder<Comment> orWhereBetween(
+    String fieldRef,
+    dynamic min,
+    dynamic max,
+  ) {
     return query().orWhereBetween(fieldRef, min, max);
   }
-
 }
 
 /// Type-safe field references for Comment queries
@@ -300,4 +342,3 @@ abstract class CommentFields {
   static const createdAt = 'created_at';
   static const updatedAt = 'updated_at';
 }
-

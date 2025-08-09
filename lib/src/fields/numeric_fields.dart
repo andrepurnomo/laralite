@@ -2,26 +2,25 @@ import 'field.dart';
 
 /// Auto-incrementing integer field (PRIMARY KEY)
 class AutoIncrementField extends Field<int> {
-  AutoIncrementField({
-    super.columnName,
-  }) : super(
-          required: false, // Auto-increment fields don't need to be set manually
-          nullable: false,
-          unique: true,
-        );
-  
+  AutoIncrementField({super.columnName})
+    : super(
+        required: false, // Auto-increment fields don't need to be set manually
+        nullable: false,
+        unique: true,
+      );
+
   @override
   String getSqlType() => 'INTEGER PRIMARY KEY AUTOINCREMENT';
-  
+
   @override
   List<String> getSqlConstraints() => []; // Constraints included in type
-  
+
   @override
   String serializeValue(int? value) {
     if (value == null) return 'NULL';
     return value.toString();
   }
-  
+
   @override
   int? deserializeValue(dynamic value) {
     if (value == null) return null;
@@ -36,7 +35,7 @@ class AutoIncrementField extends Field<int> {
 class IntField extends Field<int> {
   final int? min;
   final int? max;
-  
+
   IntField({
     this.min,
     this.max,
@@ -47,16 +46,16 @@ class IntField extends Field<int> {
     super.columnName,
     super.validationRules = const [],
   });
-  
+
   @override
   String getSqlType() => 'INTEGER';
-  
+
   @override
   String serializeValue(int? value) {
     if (value == null) return 'NULL';
     return value.toString();
   }
-  
+
   @override
   int? deserializeValue(dynamic value) {
     if (value == null) return null;
@@ -65,11 +64,11 @@ class IntField extends Field<int> {
     if (value is double) return value.toInt();
     return null;
   }
-  
+
   @override
   List<String> validateValue(int? value) {
     final errors = <String>[];
-    
+
     if (value != null) {
       if (min != null && value < min!) {
         errors.add('Value must be at least $min');
@@ -78,7 +77,7 @@ class IntField extends Field<int> {
         errors.add('Value must be at most $max');
       }
     }
-    
+
     return errors;
   }
 }
@@ -88,7 +87,7 @@ class DoubleField extends Field<double> {
   final double? min;
   final double? max;
   final int? decimalPlaces;
-  
+
   DoubleField({
     this.min,
     this.max,
@@ -100,10 +99,10 @@ class DoubleField extends Field<double> {
     super.columnName,
     super.validationRules = const [],
   });
-  
+
   @override
   String getSqlType() => 'REAL';
-  
+
   @override
   String serializeValue(double? value) {
     if (value == null) return 'NULL';
@@ -112,7 +111,7 @@ class DoubleField extends Field<double> {
     }
     return value.toString();
   }
-  
+
   @override
   double? deserializeValue(dynamic value) {
     if (value == null) return null;
@@ -121,11 +120,11 @@ class DoubleField extends Field<double> {
     if (value is String) return double.tryParse(value);
     return null;
   }
-  
+
   @override
   List<String> validateValue(double? value) {
     final errors = <String>[];
-    
+
     if (value != null) {
       if (min != null && value < min!) {
         errors.add('Value must be at least $min');
@@ -134,7 +133,7 @@ class DoubleField extends Field<double> {
         errors.add('Value must be at most $max');
       }
     }
-    
+
     return errors;
   }
 }
@@ -149,16 +148,16 @@ class BoolField extends Field<bool> {
     super.columnName,
     super.validationRules = const [],
   });
-  
+
   @override
   String getSqlType() => 'INTEGER'; // SQLite stores booleans as 0/1
-  
+
   @override
   String serializeValue(bool? value) {
     if (value == null) return 'NULL';
     return value ? '1' : '0';
   }
-  
+
   @override
   bool? deserializeValue(dynamic value) {
     if (value == null) return null;

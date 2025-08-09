@@ -8,15 +8,12 @@ part 'comment.g.dart';
 class Comment extends Model<Comment> with _$CommentFields {
   @override
   String get table => 'comments';
-  
+
   @override
   bool get timestamps => true;
-  
+
   final _id = AutoIncrementField();
-  final _content = TextField(
-    required: true,
-    maxLength: 1000,
-  );
+  final _content = TextField(required: true, maxLength: 1000);
   final _userId = ForeignKeyField(
     referencedTable: 'users',
     columnName: 'user_id',
@@ -27,18 +24,18 @@ class Comment extends Model<Comment> with _$CommentFields {
     columnName: 'post_id',
     required: true,
   );
-  final _approved = BoolField(
-    defaultValue: false,
-  );
+  final _approved = BoolField(defaultValue: false);
   final _createdAt = TimestampField(autoCreate: true, columnName: 'created_at');
   final _updatedAt = TimestampField(autoUpdate: true, columnName: 'updated_at');
-  
+
   Comment();
-  
+
   // Relationships
-  BelongsTo<User> user() => belongsTo<User>(() => User(), foreignKey: 'user_id');
-  BelongsTo<Post> post() => belongsTo<Post>(() => Post(), foreignKey: 'post_id');
-  
+  BelongsTo<User> user() =>
+      belongsTo<User>(() => User(), foreignKey: 'user_id');
+  BelongsTo<Post> post() =>
+      belongsTo<Post>(() => Post(), foreignKey: 'post_id');
+
   // Scopes
   @override
   void initializeScopes() {
@@ -46,16 +43,16 @@ class Comment extends Model<Comment> with _$CommentFields {
     registerLocalScope('approved', (query) => query.where('approved', true));
     registerLocalScope('pending', (query) => query.where('approved', false));
   }
-  
+
   // Custom methods
   bool get isApproved => approved == true;
   bool get isPending => approved == false;
-  
+
   Future<void> approve() async {
     approved = true;
     await save();
   }
-  
+
   Future<void> reject() async {
     approved = false;
     await save();
