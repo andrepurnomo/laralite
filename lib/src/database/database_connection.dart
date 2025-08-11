@@ -171,8 +171,22 @@ class DatabaseConnection {
 
   /// Close the database connection and isolate
   Future<void> close() async {
+    // Ask isolate to dispose the SQLite database cleanly first
+    if (_isolateSendPort != null) {
+      final responsePort = ReceivePort();
+      final request = DatabaseRequest(
+        type: DatabaseRequestType.close,
+        responsePort: responsePort.sendPort,
+      );
+      _isolateSendPort!.send(request);
+      // Wait for ack or error, but don't hang forever
+      await responsePort.first;
+      responsePort.close();
+      // Ignore content; proceed to kill isolate regardless
+    }
+
     if (_isolate != null) {
-      _isolate!.kill();
+      _isolate!.kill(priority: Isolate.immediate);
       _isolate = null;
     }
 

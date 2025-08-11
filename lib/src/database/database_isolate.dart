@@ -2,7 +2,7 @@ import 'dart:isolate';
 import 'package:sqlite3/sqlite3.dart';
 
 /// Types of database requests
-enum DatabaseRequestType { query, execute, transaction }
+enum DatabaseRequestType { query, execute, transaction, close }
 
 /// Data structure for initializing the database isolate
 class DatabaseIsolateInit {
@@ -86,6 +86,9 @@ class DatabaseIsolate {
           case DatabaseRequestType.transaction:
             _handleTransaction(message);
             break;
+          case DatabaseRequestType.close:
+            _handleClose(message);
+            break;
         }
       } catch (e) {
         message.responsePort.send(DatabaseResponse(error: e.toString()));
@@ -144,6 +147,18 @@ class DatabaseIsolate {
       } catch (_) {
         // Ignore rollback errors
       }
+      request.responsePort.send(DatabaseResponse(error: e.toString()));
+    }
+  }
+
+  /// Handle close request - dispose DB cleanly
+  void _handleClose(DatabaseRequest request) {
+    try {
+      _database.dispose();
+      request.responsePort.send(DatabaseResponse(result: true));
+      // After disposing, we can stop listening; the main isolate will kill us
+      _receivePort.close();
+    } catch (e) {
       request.responsePort.send(DatabaseResponse(error: e.toString()));
     }
   }
