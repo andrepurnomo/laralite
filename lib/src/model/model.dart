@@ -151,12 +151,13 @@ abstract class Model<T extends Model<T>> {
       final columnName = entry.key;
       final field = entry.value;
 
-      if (field.value != null) {
+      // Include nullable fields even when value is null
+      if (field.value != null || field.nullable) {
         // Use field's serialization method
         final serializedValue = field.serializeValue(field.value);
 
         // Parse the serialized value back to proper type for Map
-        if (serializedValue == 'NULL') {
+        if (serializedValue == 'NULL' || field.value == null) {
           map[columnName] = null;
         } else if (serializedValue.startsWith("'") &&
             serializedValue.endsWith("'")) {
