@@ -49,6 +49,7 @@ A powerful and elegant ORM (Object-Relational Mapping) library for Flutter/Dart,
 ⏰ **Timestamps** - Automatic created_at/updated_at management  
 🎯 **Type Safety** - Full type safety with code generation  
 🔧 **Code Generation** - Automatic property generation with build_runner  
+🔐 **Database Encryption** - SQLCipher support for encrypted databases  
 
 ## Installation
 
@@ -63,6 +64,8 @@ dependencies:
       url: https://github.com/andrepurnomo/laralite.git
       ref: main
   sqlite3: ^2.8.0
+  # Required for encryption support
+  sqlcipher_flutter_libs: ^0.6.2
   
 dev_dependencies:
   build_runner: ^2.6.0
@@ -80,6 +83,12 @@ import 'package:laralite/laralite.dart';
 void main() async {
   // Initialize database connection
   await Laralite.initialize(databaseName: 'app.db');
+  
+  // Or with encryption (SQLCipher)
+  await Laralite.initialize(
+    databaseName: 'app.db',
+    encryptionKey: 'your-secret-key',
+  );
   
   runApp(MyApp());
 }
@@ -394,6 +403,68 @@ final users = await Model.createMany<User>(() => User(), [
   {'name': 'Bob', 'email': 'bob@example.com', 'age': 30},
 ]);
 ```
+
+## Database Encryption
+
+Laralite supports database encryption using SQLCipher for secure data storage:
+
+### Basic Usage
+
+```dart
+import 'package:laralite/laralite.dart';
+
+void main() async {
+  // Initialize with encryption
+  await Laralite.initialize(
+    databaseName: 'secure_app.db',
+    encryptionKey: 'your-very-secure-secret-key',
+  );
+  
+  runApp(MyApp());
+}
+```
+
+### Key Features
+
+✅ **Automatic SQLCipher Setup** - Platform-specific SQLCipher configuration  
+✅ **Cross-Platform Support** - Works on Android, iOS, macOS, Windows, Linux  
+✅ **Transparent Encryption** - Use models and queries normally  
+✅ **Validation** - Automatic verification that encryption is working  
+✅ **Fallback Support** - Works without encryption if no key provided  
+
+### Important Notes
+
+- **Android**: Automatically configures SQLCipher override for proper library loading
+- **iOS/macOS**: May require additional Xcode configuration for some apps
+- **Development**: Can omit `encryptionKey` for non-encrypted development databases
+- **Performance**: Minimal overhead, encryption happens at SQLite level
+
+### Security Best Practices
+
+```dart
+// ✅ Good: Use environment variables or secure storage
+final encryptionKey = Platform.environment['DB_ENCRYPTION_KEY'] ?? 
+                     await FlutterSecureStorage().read(key: 'db_key');
+
+await Laralite.initialize(
+  databaseName: 'app.db',
+  encryptionKey: encryptionKey,
+);
+
+// ❌ Bad: Hardcoded keys in source code
+await Laralite.initialize(
+  databaseName: 'app.db', 
+  encryptionKey: 'hardcoded-secret', // Don't do this!
+);
+```
+
+### Troubleshooting
+
+If you encounter issues:
+
+1. **Android 6 Issues**: Try adding `android.bundle.enableUncompressedNativeLibs=false` to `gradle.properties`
+2. **iOS/macOS Conflicts**: Add `-framework SQLCipher` to "Other Linker Flags" in Xcode
+3. **Verification Failed**: Check that `sqlcipher_flutter_libs` is properly installed
 
 ## Transactions
 

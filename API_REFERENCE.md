@@ -2,6 +2,48 @@
 
 A comprehensive reference for all available APIs in Laralite ORM.
 
+## Laralite Class
+
+### initialize()
+```dart
+static Future<void> initialize({
+  String? databasePath,
+  String databaseName = 'laralite.db',
+  String? encryptionKey,
+})
+```
+
+Initialize the Laralite ORM with database configuration.
+
+**Parameters:**
+- `databasePath` (optional): Custom path for database file. If not provided, uses current directory.
+- `databaseName`: Name of the database file (default: 'laralite.db')
+- `encryptionKey` (optional): SQLCipher encryption key for database encryption
+
+**Examples:**
+```dart
+// Basic initialization
+await Laralite.initialize(databaseName: 'myapp.db');
+
+// With encryption
+await Laralite.initialize(
+  databaseName: 'secure.db',
+  encryptionKey: 'my-secret-key',
+);
+
+// Custom path with encryption
+await Laralite.initialize(
+  databasePath: '/path/to/custom/location/app.db',
+  encryptionKey: Platform.environment['DB_KEY'],
+);
+```
+
+**Security Notes:**
+- Never hardcode encryption keys in source code
+- Use environment variables or secure storage for keys
+- Encryption uses SQLCipher with automatic platform configuration
+- Database operates normally without encryption if key not provided
+
 ## Model Class
 
 ### Static Methods
