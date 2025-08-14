@@ -5,10 +5,12 @@ import 'database_isolate.dart';
 class DatabaseConnection {
   static DatabaseConnection? _instance;
   static String? _databasePath;
+  static String? _encryptionKey;
 
   SendPort? _isolateSendPort;
   Isolate? _isolate;
   ReceivePort? _receivePort;
+  bool _inTransaction = false;
 
   DatabaseConnection._();
 
@@ -18,9 +20,13 @@ class DatabaseConnection {
     return _instance!;
   }
 
-  /// Initialize database with path
-  static Future<void> initialize(String databasePath) async {
+  /// Initialize database with path and optional encryption key
+  static Future<void> initialize(
+    String databasePath, {
+    String? encryptionKey,
+  }) async {
     _databasePath = databasePath;
+    _encryptionKey = encryptionKey;
     await instance._initializeIsolate();
   }
 
@@ -37,6 +43,7 @@ class DatabaseConnection {
       DatabaseIsolateInit(
         sendPort: _receivePort!.sendPort,
         databasePath: _databasePath!,
+        encryptionKey: _encryptionKey,
       ),
     );
 
@@ -137,6 +144,7 @@ class DatabaseConnection {
   ///
   /// Automatically commits on success and rolls back on error.
   /// Returns the result of the callback function.
+  /// If already in a transaction, executes callback without creating nested transaction.
   Future<T> withTransaction<T>(Future<T> Function() callback) async {
     if (_isolateSendPort == null) {
       throw StateError(
@@ -144,7 +152,13 @@ class DatabaseConnection {
       );
     }
 
+    // If already in transaction, just execute callback
+    if (_inTransaction) {
+      return await callback();
+    }
+
     // Begin transaction
+    _inTransaction = true;
     await execute('BEGIN TRANSACTION');
 
     try {
@@ -153,10 +167,12 @@ class DatabaseConnection {
 
       // Commit transaction on success
       await execute('COMMIT');
+      _inTransaction = false;
 
       return result;
     } catch (error) {
       // Rollback transaction on error
+      _inTransaction = false;
       try {
         await execute('ROLLBACK');
       } catch (rollbackError) {

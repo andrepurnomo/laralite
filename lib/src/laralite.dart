@@ -19,6 +19,7 @@ class Laralite {
   static Future<void> initialize({
     String? databasePath,
     String databaseName = 'laralite.db',
+    String? encryptionKey,
   }) async {
     if (_initialized) {
       throw StateError('Laralite already initialized');
@@ -27,6 +28,7 @@ class Laralite {
     await Database.initialize(
       databasePath: databasePath,
       databaseName: databaseName,
+      encryptionKey: encryptionKey,
     );
 
     _initialized = true;

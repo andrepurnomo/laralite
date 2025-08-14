@@ -1,5 +1,8 @@
 import 'dart:isolate';
+import 'dart:io';
 import 'package:sqlite3/sqlite3.dart';
+import 'package:sqlite3/open.dart';
+import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 
 /// Types of database requests
 enum DatabaseRequestType { query, execute, transaction, close }
@@ -8,8 +11,13 @@ enum DatabaseRequestType { query, execute, transaction, close }
 class DatabaseIsolateInit {
   final SendPort sendPort;
   final String databasePath;
+  final String? encryptionKey;
 
-  DatabaseIsolateInit({required this.sendPort, required this.databasePath});
+  DatabaseIsolateInit({
+    required this.sendPort,
+    required this.databasePath,
+    this.encryptionKey,
+  });
 }
 
 /// Data structure for database requests
@@ -53,8 +61,28 @@ class DatabaseIsolate {
   /// Initialize the isolate with database connection
   void _initialize(DatabaseIsolateInit init) {
     try {
-      // Open SQLite database
+      // Setup SQLCipher for Android if encryption key is provided
+      if (init.encryptionKey != null &&
+          init.encryptionKey!.isNotEmpty &&
+          Platform.isAndroid) {
+        open.overrideFor(OperatingSystem.android, openCipherOnAndroid);
+      }
+
+      // Open SQLite database with SQLCipher
       _database = sqlite3.open(init.databasePath);
+
+      // Set encryption key if provided
+      if (init.encryptionKey != null && init.encryptionKey!.isNotEmpty) {
+        _database.execute('PRAGMA key = "${init.encryptionKey}";');
+
+        // Verify SQLCipher is working
+        final result = _database.select('PRAGMA cipher_version;');
+        if (result.isEmpty || result.first.values.isEmpty) {
+          throw StateError(
+            'SQLCipher library is not available, please check your dependencies!',
+          );
+        }
+      }
 
       // Enable foreign keys
       _database.execute('PRAGMA foreign_keys = ON');

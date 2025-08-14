@@ -13,6 +13,7 @@ class Database {
   static Future<void> initialize({
     String? databasePath,
     String databaseName = 'laralite.db',
+    String? encryptionKey,
   }) async {
     if (_initialized) {
       throw StateError('Database already initialized');
@@ -27,7 +28,7 @@ class Database {
       dbPath = path.join(Directory.current.path, databaseName);
     }
 
-    await DatabaseConnection.initialize(dbPath);
+    await DatabaseConnection.initialize(dbPath, encryptionKey: encryptionKey);
     _initialized = true;
   }
 
