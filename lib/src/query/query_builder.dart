@@ -7,37 +7,37 @@ import '../database/database.dart';
 dynamic processQueryParameter(dynamic value) {
   // Handle null
   if (value == null) return null;
-  
+
   // DateTime -> ISO 8601 string (UTC)
   if (value is DateTime) {
     return value.toUtc().toIso8601String();
   }
-  
+
   // Boolean -> INTEGER (0 or 1)
   if (value is bool) {
     return value ? 1 : 0;
   }
-  
+
   // Enum -> string representation
   if (value is Enum) {
     return value.name;
   }
-  
+
   // Duration -> milliseconds as INTEGER
   if (value is Duration) {
     return value.inMilliseconds;
   }
-  
+
   // Uri -> string representation
   if (value is Uri) {
     return value.toString();
   }
-  
+
   // BigInt -> string (to avoid SQLite INTEGER overflow)
   if (value is BigInt) {
     return value.toString();
   }
-  
+
   // List/Iterable -> JSON string (for proper serialization)
   if (value is List || value is Iterable) {
     try {
@@ -46,7 +46,7 @@ dynamic processQueryParameter(dynamic value) {
       return value.toString();
     }
   }
-  
+
   // Map -> JSON string (for proper serialization)
   if (value is Map) {
     try {
@@ -55,12 +55,12 @@ dynamic processQueryParameter(dynamic value) {
       return value.toString();
     }
   }
-  
+
   // Already SQLite-compatible types: String, int, double, num
   if (value is String || value is int || value is double || value is num) {
     return value;
   }
-  
+
   // Fallback: convert to string
   return value.toString();
 }
@@ -540,15 +540,15 @@ class QueryBuilder<T extends Model<T>> {
   /// Get query parameters
   List<dynamic> _getParameters() {
     final parameters = <dynamic>[];
-    
+
     // Add raw bindings from selectRaw() calls first
     parameters.addAll(_rawBindings);
-    
+
     // Add parameters from WHERE conditions
     for (final condition in _whereConditions) {
       parameters.addAll(condition.getParameters());
     }
-    
+
     return parameters;
   }
 
@@ -661,13 +661,19 @@ class QueryBuilder<T extends Model<T>> {
   // =============================================================================
 
   /// Calculate sum with default value (equivalent to IFNULL(SUM(column), defaultValue))
-  Future<double> sumWithDefault(String column, [double defaultValue = 0.0]) async {
+  Future<double> sumWithDefault(
+    String column, [
+    double defaultValue = 0.0,
+  ]) async {
     final result = await sum(column);
     return result ?? defaultValue;
   }
 
   /// Calculate average with default value (equivalent to IFNULL(AVG(column), defaultValue))
-  Future<double> avgWithDefault(String column, [double defaultValue = 0.0]) async {
+  Future<double> avgWithDefault(
+    String column, [
+    double defaultValue = 0.0,
+  ]) async {
     final result = await avg(column);
     return result ?? defaultValue;
   }
@@ -701,7 +707,11 @@ class QueryBuilder<T extends Model<T>> {
   }
 
   /// Filter by date range (equivalent to DATE(column) BETWEEN start AND end)
-  QueryBuilder<T> whereDateBetween(String column, DateTime start, DateTime end) {
+  QueryBuilder<T> whereDateBetween(
+    String column,
+    DateTime start,
+    DateTime end,
+  ) {
     final startString = start.toIso8601String().substring(0, 10);
     final endString = end.toIso8601String().substring(0, 10);
     return whereRaw('DATE($column) BETWEEN ? AND ?', [startString, endString]);
@@ -765,12 +775,12 @@ class QueryBuilder<T extends Model<T>> {
   QueryBuilder<T> selectRaw(String expression, [List<dynamic>? bindings]) {
     _selectColumns ??= [];
     _selectColumns!.add(expression);
-    
+
     // Store bindings for later use in query building
     if (bindings != null) {
       _rawBindings.addAll(bindings);
     }
-    
+
     return this;
   }
 
@@ -782,7 +792,7 @@ class QueryBuilder<T extends Model<T>> {
     return this;
   }
 
-  /// Add raw SQL OR WHERE condition  
+  /// Add raw SQL OR WHERE condition
   QueryBuilder<T> orWhereRaw(String expression, [List<dynamic>? bindings]) {
     final condition = WhereRawCondition(expression, bindings ?? []);
     _whereConditions.add(condition);

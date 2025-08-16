@@ -37,14 +37,18 @@ void main() async {
           created_at TEXT
         )
       ''');
-      
+
       await Database.execute('DELETE FROM test_users');
-      
+
       // Insert test data manually
-      await Database.execute('INSERT INTO test_users (name, email, created_at) VALUES (?, ?, ?)', 
-        ['John', 'john@example.com', '2024-01-15 10:00:00']);
-      await Database.execute('INSERT INTO test_users (name, email, created_at) VALUES (?, ?, ?)', 
-        ['Jane', 'jane@example.com', '2024-01-16 15:30:00']);
+      await Database.execute(
+        'INSERT INTO test_users (name, email, created_at) VALUES (?, ?, ?)',
+        ['John', 'john@example.com', '2024-01-15 10:00:00'],
+      );
+      await Database.execute(
+        'INSERT INTO test_users (name, email, created_at) VALUES (?, ?, ?)',
+        ['Jane', 'jane@example.com', '2024-01-16 15:30:00'],
+      );
     });
 
     tearDown(() async {
@@ -53,17 +57,23 @@ void main() async {
 
     group('Raw SQL Methods', () {
       test('selectRaw generates SQL correctly', () async {
-        final query = Model.query<TestUser>(() => TestUser()).selectRaw('COUNT(*) as total').toSql();
+        final query = Model.query<TestUser>(
+          () => TestUser(),
+        ).selectRaw('COUNT(*) as total').toSql();
         expect(query, contains('COUNT(*) as total'));
       });
 
       test('whereRaw generates SQL correctly', () async {
-        final query = Model.query<TestUser>(() => TestUser()).whereRaw('name LIKE ?', ['%John%']).toSql();
+        final query = Model.query<TestUser>(
+          () => TestUser(),
+        ).whereRaw('name LIKE ?', ['%John%']).toSql();
         expect(query, contains('name LIKE ?'));
       });
 
       test('groupByRaw generates SQL correctly', () async {
-        final query = Model.query<TestUser>(() => TestUser()).groupByRaw('name').toSql();
+        final query = Model.query<TestUser>(
+          () => TestUser(),
+        ).groupByRaw('name').toSql();
         expect(query, contains('GROUP BY name'));
       });
     });
@@ -72,13 +82,17 @@ void main() async {
       test('whereDateBetween generates SQL correctly', () async {
         final start = DateTime(2024, 1, 15);
         final end = DateTime(2024, 1, 16);
-        
-        final query = Model.query<TestUser>(() => TestUser()).whereDateBetween('created_at', start, end).toSql();
+
+        final query = Model.query<TestUser>(
+          () => TestUser(),
+        ).whereDateBetween('created_at', start, end).toSql();
         expect(query, contains('DATE(created_at) BETWEEN ? AND ?'));
       });
 
       test('whereYear generates SQL correctly', () async {
-        final query = Model.query<TestUser>(() => TestUser()).whereYear('created_at', 2024).toSql();
+        final query = Model.query<TestUser>(
+          () => TestUser(),
+        ).whereYear('created_at', 2024).toSql();
         expect(query, contains("strftime('%Y', created_at) = ?"));
       });
     });
