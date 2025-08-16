@@ -1,6 +1,69 @@
+import 'dart:convert';
 import '../model/model.dart';
 import '../model/soft_deletes.dart';
 import '../database/database.dart';
+
+/// Helper function to process query parameters with automatic type conversion to SQLite-compatible types
+dynamic processQueryParameter(dynamic value) {
+  // Handle null
+  if (value == null) return null;
+  
+  // DateTime -> ISO 8601 string (UTC)
+  if (value is DateTime) {
+    return value.toUtc().toIso8601String();
+  }
+  
+  // Boolean -> INTEGER (0 or 1)
+  if (value is bool) {
+    return value ? 1 : 0;
+  }
+  
+  // Enum -> string representation
+  if (value is Enum) {
+    return value.name;
+  }
+  
+  // Duration -> milliseconds as INTEGER
+  if (value is Duration) {
+    return value.inMilliseconds;
+  }
+  
+  // Uri -> string representation
+  if (value is Uri) {
+    return value.toString();
+  }
+  
+  // BigInt -> string (to avoid SQLite INTEGER overflow)
+  if (value is BigInt) {
+    return value.toString();
+  }
+  
+  // List/Iterable -> JSON string (for proper serialization)
+  if (value is List || value is Iterable) {
+    try {
+      return jsonEncode(value.toList());
+    } catch (e) {
+      return value.toString();
+    }
+  }
+  
+  // Map -> JSON string (for proper serialization)
+  if (value is Map) {
+    try {
+      return jsonEncode(value);
+    } catch (e) {
+      return value.toString();
+    }
+  }
+  
+  // Already SQLite-compatible types: String, int, double, num
+  if (value is String || value is int || value is double || value is num) {
+    return value;
+  }
+  
+  // Fallback: convert to string
+  return value.toString();
+}
 
 /// Query builder for constructing and executing database queries
 class QueryBuilder<T extends Model<T>> {
@@ -30,6 +93,12 @@ class QueryBuilder<T extends Model<T>> {
 
   /// Relationships to eager load
   final List<String> _includes = [];
+
+  /// Raw SQL bindings for selectRaw, whereRaw etc.
+  final List<dynamic> _rawBindings = [];
+
+  /// GROUP BY columns (including raw expressions)
+  List<String>? _groupByColumns;
 
   /// Constructor
   QueryBuilder(this._modelConstructor) : _modelInstance = _modelConstructor();
@@ -410,6 +479,12 @@ class QueryBuilder<T extends Model<T>> {
       query += ' WHERE ${whereConditions.join(' AND ')}';
     }
 
+    // Add GROUP BY
+    if (_groupByColumns != null && _groupByColumns!.isNotEmpty) {
+      final groupByClause = _groupByColumns!.join(', ');
+      query += ' GROUP BY $groupByClause';
+    }
+
     // Add ORDER BY
     if (_orderClauses.isNotEmpty) {
       final orderClause = _orderClauses.map((c) => c.toSql()).join(', ');
@@ -465,9 +540,15 @@ class QueryBuilder<T extends Model<T>> {
   /// Get query parameters
   List<dynamic> _getParameters() {
     final parameters = <dynamic>[];
+    
+    // Add raw bindings from selectRaw() calls first
+    parameters.addAll(_rawBindings);
+    
+    // Add parameters from WHERE conditions
     for (final condition in _whereConditions) {
       parameters.addAll(condition.getParameters());
     }
+    
     return parameters;
   }
 
@@ -573,6 +654,153 @@ class QueryBuilder<T extends Model<T>> {
     _selectColumns = originalSelect; // Restore original select
 
     return rows.isNotEmpty ? rows.first['min'] : null;
+  }
+
+  // =============================================================================
+  // NULL-SAFE AGGREGATE FUNCTIONS
+  // =============================================================================
+
+  /// Calculate sum with default value (equivalent to IFNULL(SUM(column), defaultValue))
+  Future<double> sumWithDefault(String column, [double defaultValue = 0.0]) async {
+    final result = await sum(column);
+    return result ?? defaultValue;
+  }
+
+  /// Calculate average with default value (equivalent to IFNULL(AVG(column), defaultValue))
+  Future<double> avgWithDefault(String column, [double defaultValue = 0.0]) async {
+    final result = await avg(column);
+    return result ?? defaultValue;
+  }
+
+  /// Count with default value (equivalent to IFNULL(COUNT(*), defaultValue))
+  Future<int> countWithDefault([int defaultValue = 0]) async {
+    final result = await count();
+    return result;
+  }
+
+  /// Find max with default value (equivalent to IFNULL(MAX(column), defaultValue))
+  Future<T2> maxWithDefault<T2>(String column, T2 defaultValue) async {
+    final result = await max(column);
+    return result ?? defaultValue;
+  }
+
+  /// Find min with default value (equivalent to IFNULL(MIN(column), defaultValue))
+  Future<T2> minWithDefault<T2>(String column, T2 defaultValue) async {
+    final result = await min(column);
+    return result ?? defaultValue;
+  }
+
+  // =============================================================================
+  // DATE FUNCTIONS
+  // =============================================================================
+
+  /// Filter by date part of datetime column (equivalent to DATE(column) = date)
+  QueryBuilder<T> whereDate(String column, String operator, DateTime date) {
+    final dateString = date.toIso8601String().substring(0, 10); // YYYY-MM-DD
+    return whereRaw('DATE($column) $operator ?', [dateString]);
+  }
+
+  /// Filter by date range (equivalent to DATE(column) BETWEEN start AND end)
+  QueryBuilder<T> whereDateBetween(String column, DateTime start, DateTime end) {
+    final startString = start.toIso8601String().substring(0, 10);
+    final endString = end.toIso8601String().substring(0, 10);
+    return whereRaw('DATE($column) BETWEEN ? AND ?', [startString, endString]);
+  }
+
+  /// Filter by year (equivalent to strftime('%Y', column) = year)
+  QueryBuilder<T> whereYear(String column, int year) {
+    return whereRaw("strftime('%Y', $column) = ?", [year.toString()]);
+  }
+
+  /// Filter by month (equivalent to strftime('%m', column) = month)
+  QueryBuilder<T> whereMonth(String column, int month) {
+    final monthString = month.toString().padLeft(2, '0');
+    return whereRaw("strftime('%m', $column) = ?", [monthString]);
+  }
+
+  /// Filter by day (equivalent to strftime('%d', column) = day)
+  QueryBuilder<T> whereDay(String column, int day) {
+    final dayString = day.toString().padLeft(2, '0');
+    return whereRaw("strftime('%d', $column) = ?", [dayString]);
+  }
+
+  /// Group by date part (equivalent to GROUP BY DATE(column))
+  QueryBuilder<T> groupByDate(String column) {
+    return groupByRaw('DATE($column)');
+  }
+
+  /// Group by year (equivalent to GROUP BY strftime('%Y', column))
+  QueryBuilder<T> groupByYear(String column) {
+    return groupByRaw("strftime('%Y', $column)");
+  }
+
+  /// Group by month (equivalent to GROUP BY strftime('%Y-%m', column))
+  QueryBuilder<T> groupByMonth(String column) {
+    return groupByRaw("strftime('%Y-%m', $column)");
+  }
+
+  /// Select date part in results (equivalent to DATE(column) as alias)
+  QueryBuilder<T> selectDate(String column, [String? alias]) {
+    final aliasName = alias ?? '${column}_date';
+    return selectRaw('DATE($column) as $aliasName');
+  }
+
+  /// Select year part in results
+  QueryBuilder<T> selectYear(String column, [String? alias]) {
+    final aliasName = alias ?? '${column}_year';
+    return selectRaw("strftime('%Y', $column) as $aliasName");
+  }
+
+  /// Select month part in results
+  QueryBuilder<T> selectMonth(String column, [String? alias]) {
+    final aliasName = alias ?? '${column}_month';
+    return selectRaw("strftime('%Y-%m', $column) as $aliasName");
+  }
+
+  // =============================================================================
+  // RAW SQL SUPPORT METHODS
+  // =============================================================================
+
+  /// Add raw SQL to SELECT clause
+  QueryBuilder<T> selectRaw(String expression, [List<dynamic>? bindings]) {
+    _selectColumns ??= [];
+    _selectColumns!.add(expression);
+    
+    // Store bindings for later use in query building
+    if (bindings != null) {
+      _rawBindings.addAll(bindings);
+    }
+    
+    return this;
+  }
+
+  /// Add raw SQL WHERE condition
+  QueryBuilder<T> whereRaw(String expression, [List<dynamic>? bindings]) {
+    final condition = WhereRawCondition(expression, bindings ?? []);
+    _whereConditions.add(condition);
+    _whereBooleans.add('AND');
+    return this;
+  }
+
+  /// Add raw SQL OR WHERE condition  
+  QueryBuilder<T> orWhereRaw(String expression, [List<dynamic>? bindings]) {
+    final condition = WhereRawCondition(expression, bindings ?? []);
+    _whereConditions.add(condition);
+    _whereBooleans.add('OR');
+    return this;
+  }
+
+  /// Add raw SQL to GROUP BY clause
+  QueryBuilder<T> groupByRaw(String expression) {
+    _groupByColumns ??= [];
+    _groupByColumns!.add(expression);
+    return this;
+  }
+
+  /// Add raw SQL to ORDER BY clause
+  QueryBuilder<T> orderByRaw(String expression) {
+    _orderClauses.add(OrderClause(expression, '', isRaw: true));
+    return this;
   }
 
   /// Apply a scope (callback function)
@@ -903,7 +1131,7 @@ class BasicWhereCondition extends WhereCondition {
 
   @override
   List<dynamic> getParameters() {
-    return [value];
+    return [processQueryParameter(value)];
   }
 }
 
@@ -922,7 +1150,7 @@ class WhereInCondition extends WhereCondition {
 
   @override
   List<dynamic> getParameters() {
-    return values;
+    return values.map(processQueryParameter).toList();
   }
 }
 
@@ -941,7 +1169,7 @@ class WhereNotInCondition extends WhereCondition {
 
   @override
   List<dynamic> getParameters() {
-    return values;
+    return values.map(processQueryParameter).toList();
   }
 }
 
@@ -978,7 +1206,25 @@ class WhereBetweenCondition extends WhereCondition {
 
   @override
   List<dynamic> getParameters() {
-    return [min, max];
+    return [processQueryParameter(min), processQueryParameter(max)];
+  }
+}
+
+/// WHERE RAW SQL condition
+class WhereRawCondition extends WhereCondition {
+  final String expression;
+  final List<dynamic> bindings;
+
+  WhereRawCondition(this.expression, this.bindings);
+
+  @override
+  String toSql() {
+    return expression;
+  }
+
+  @override
+  List<dynamic> getParameters() {
+    return bindings.map(processQueryParameter).toList();
   }
 }
 
@@ -986,11 +1232,12 @@ class WhereBetweenCondition extends WhereCondition {
 class OrderClause {
   final String column;
   final String direction;
+  final bool isRaw;
 
-  OrderClause(this.column, this.direction);
+  OrderClause(this.column, this.direction, {this.isRaw = false});
 
   String toSql() {
-    return '$column $direction';
+    return isRaw ? column : '$column $direction';
   }
 }
 

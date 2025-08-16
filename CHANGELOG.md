@@ -1,6 +1,11 @@
 ## 0.0.1-dev
 
 ### Added
+- **Automatic DateTime Parameter Conversion**: DateTime objects are now automatically converted to ISO 8601 string format when used as query parameters
+  - Applies to all WHERE conditions: `where()`, `whereBetween()`, `whereIn()`, `whereNotIn()`
+  - No more manual `DateFormatter.formatForSql()` calls needed
+  - DateTime objects are converted to UTC ISO strings automatically
+  - Example: `query.whereBetween('created_at', startDate, endDate)` now works directly with DateTime objects
 - **Database Encryption Support**: Full SQLCipher integration for encrypted databases
   - Optional `encryptionKey` parameter in `Laralite.initialize()`
   - Automatic platform-specific SQLCipher configuration (Android override, iOS/macOS support)

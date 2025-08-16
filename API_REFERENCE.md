@@ -105,7 +105,18 @@ Specify which columns to select.
 QueryBuilder<T> where(String column, dynamic value)
 QueryBuilder<T> where(String column, String operator, dynamic value)
 ```
-Add WHERE condition to query.
+Add WHERE condition to query. DateTime objects are automatically converted to ISO 8601 string format.
+
+**Example:**
+```dart
+// Automatic DateTime conversion
+final date = DateTime(2024, 1, 15);
+query.where('created_at', '>', date);
+
+// Also works with other types
+query.where('name', 'John');
+query.where('price', '>=', 100.0);
+```
 
 #### orWhere()
 ```dart
@@ -120,19 +131,38 @@ Add OR WHERE condition to query.
 ```dart
 QueryBuilder<T> whereIn(String column, List<dynamic> values)
 ```
-Add WHERE IN condition.
+Add WHERE IN condition. Supports automatic type conversion for all values in the list.
+
+**Example:**
+```dart
+// Mixed types with automatic conversion
+query.whereIn('status', [Status.active, Status.pending]);
+query.whereIn('created_at', [date1, date2, date3]);
+query.whereIn('is_enabled', [true, false]);
+```
 
 #### whereNotIn()
 ```dart
 QueryBuilder<T> whereNotIn(String column, List<dynamic> values)
 ```
-Add WHERE NOT IN condition.
+Add WHERE NOT IN condition. Supports automatic type conversion for all values in the list.
 
 #### whereBetween()
 ```dart
 QueryBuilder<T> whereBetween(String column, dynamic min, dynamic max)
 ```
-Add WHERE BETWEEN condition.
+Add WHERE BETWEEN condition. DateTime objects are automatically converted to ISO 8601 string format.
+
+**Example:**
+```dart
+// Automatic DateTime conversion
+final startDate = DateTime(2024, 1, 1);
+final endDate = DateTime(2024, 1, 31);
+query.whereBetween('created_at', startDate, endDate);
+
+// Also works with other types
+query.whereBetween('price', 100.0, 500.0);
+```
 
 #### whereNull()
 ```dart

@@ -905,4 +905,47 @@ class DatabaseLogger {
 
 ---
 
+## 13. Automatic Parameter Type Conversion
+
+Laralite automatically converts Dart types to SQLite-compatible formats:
+
+```dart
+// DateTime objects (converted to UTC ISO 8601 strings)
+query.where('created_at', '>', DateTime.now());
+query.whereBetween('updated_at', startDate, endDate);
+
+// Boolean values (converted to INTEGER 0/1)
+query.where('is_active', true);  // becomes: WHERE is_active = 1
+
+// Enums (converted to string names)
+enum Status { active, inactive }
+query.where('status', Status.active);  // becomes: WHERE status = 'active'
+
+// Duration objects (converted to milliseconds)
+query.where('timeout', Duration(minutes: 5));  // becomes: WHERE timeout = 300000
+
+// Complex types (converted to JSON strings)
+query.where('metadata', {'key': 'value'});  // becomes JSON string
+query.whereIn('tags', ['tag1', 'tag2']);    // becomes JSON array
+
+// All supported WHERE methods with automatic conversion:
+query.where('column', value)
+query.whereBetween('column', min, max)  
+query.whereIn('column', [value1, value2])
+query.whereNotIn('column', [value1, value2])
+```
+
+**Supported Type Conversions:**
+- `DateTime` → UTC ISO 8601 string
+- `bool` → INTEGER (0/1)
+- `Enum` → string name
+- `Duration` → milliseconds (INTEGER)
+- `Uri` → string representation
+- `BigInt` → string (prevents overflow)
+- `List/Iterable` → JSON string
+- `Map` → JSON string  
+- `String`, `int`, `double`, `num` → unchanged (native SQLite types)
+
+---
+
 **💡 Tip**: Follow this guide step by step for the best Laralite development experience. Each step builds on the previous one, so don't skip ahead!
