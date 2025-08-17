@@ -50,6 +50,14 @@ class DateTimeField extends Field<DateTime> {
       try {
         if (dateOnly) {
           // Parse date-only string and return as local midnight
+          final parts = value.split('-');
+          if (parts.length == 3) {
+            final year = int.parse(parts[0]);
+            final month = int.parse(parts[1]);
+            final day = int.parse(parts[2]);
+            return DateTime(year, month, day);
+          }
+          // Fallback to original method if parsing fails
           final date = DateTime.parse('${value}T00:00:00.000Z');
           return date.toLocal();
         } else if (timeOnly) {
