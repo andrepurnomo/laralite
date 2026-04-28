@@ -61,10 +61,9 @@ class DatabaseIsolate {
   /// Initialize the isolate with database connection
   void _initialize(DatabaseIsolateInit init) {
     try {
-      // Setup SQLCipher for Android if encryption key is provided
-      if (init.encryptionKey != null &&
-          init.encryptionKey!.isNotEmpty &&
-          Platform.isAndroid) {
+      // Always override SQLite library on Android using sqlcipher_flutter_libs
+      // This is needed regardless of encryption, since Android doesn't bundle libsqlite3.so
+      if (Platform.isAndroid) {
         open.overrideFor(OperatingSystem.android, openCipherOnAndroid);
       }
 

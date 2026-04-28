@@ -16,7 +16,7 @@ class Database {
     String? encryptionKey,
   }) async {
     if (_initialized) {
-      throw StateError('Database already initialized');
+      return; // Already initialized, skip silently
     }
 
     String dbPath;

@@ -37,6 +37,7 @@ class DatabaseConnection {
   Future<void> _initializeIsolate() async {
     if (_isolate != null) return;
 
+    print('🔍 [DBConn] Spawning database isolate...');
     _receivePort = ReceivePort();
     _isolate = await Isolate.spawn(
       DatabaseIsolate.entryPoint,
@@ -46,12 +47,28 @@ class DatabaseConnection {
         encryptionKey: _encryptionKey,
       ),
     );
+    print('🔍 [DBConn] Isolate spawned, waiting for SendPort...');
 
     // Wait for isolate to send back its SendPort
     await for (final message in _receivePort!) {
       if (message is SendPort) {
         _isolateSendPort = message;
+        print('🔍 [DBConn] Received SendPort from isolate');
         break;
+      } else if (message is DatabaseResponse && message.error != null) {
+        // Isolate sent an error instead of SendPort
+        print('❌ [DBConn] Isolate init error: ${message.error}');
+        _isolate?.kill();
+        _isolate = null;
+        _receivePort?.close();
+        _receivePort = null;
+        throw Exception(
+          'Database isolate initialization failed: ${message.error}',
+        );
+      } else {
+        print(
+          '⚠️ [DBConn] Unexpected message from isolate: ${message.runtimeType} = $message',
+        );
       }
     }
   }

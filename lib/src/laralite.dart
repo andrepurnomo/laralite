@@ -22,7 +22,7 @@ class Laralite {
     String? encryptionKey,
   }) async {
     if (_initialized) {
-      throw StateError('Laralite already initialized');
+      return; // Already initialized, skip silently
     }
 
     await Database.initialize(
