@@ -78,7 +78,18 @@ class DateTimeField extends Field<DateTime> {
           );
         } else {
           // Parse full datetime and convert to local
-          return DateTime.parse(value).toLocal();
+          final sqliteUtcWithoutOffset = RegExp(
+            r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?$',
+          ).hasMatch(value.trim());
+          final normalized = value.trim().replaceFirst(' ', 'T');
+          final hasTimezone = RegExp(
+            r'(Z|z|[+-]\d{2}:?\d{2})$',
+          ).hasMatch(normalized);
+          return DateTime.parse(
+            sqliteUtcWithoutOffset && !hasTimezone
+                ? '${normalized}Z'
+                : normalized,
+          ).toLocal();
         }
       } catch (e) {
         return null;

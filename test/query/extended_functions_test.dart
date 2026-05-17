@@ -86,14 +86,17 @@ void main() async {
         final query = Model.query<TestUser>(
           () => TestUser(),
         ).whereDateBetween('created_at', start, end).toSql();
-        expect(query, contains('DATE(created_at) BETWEEN ? AND ?'));
+        expect(
+          query,
+          contains("DATE(created_at, 'localtime') BETWEEN ? AND ?"),
+        );
       });
 
       test('whereYear generates SQL correctly', () async {
         final query = Model.query<TestUser>(
           () => TestUser(),
         ).whereYear('created_at', 2024).toSql();
-        expect(query, contains("strftime('%Y', created_at) = ?"));
+        expect(query, contains("strftime('%Y', created_at, 'localtime') = ?"));
       });
     });
   });

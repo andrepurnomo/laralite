@@ -703,7 +703,7 @@ class QueryBuilder<T extends Model<T>> {
   /// Filter by date part of datetime column (equivalent to DATE(column) = date)
   QueryBuilder<T> whereDate(String column, String operator, DateTime date) {
     final dateString = date.toIso8601String().substring(0, 10); // YYYY-MM-DD
-    return whereRaw('DATE($column) $operator ?', [dateString]);
+    return whereRaw("DATE($column, 'localtime') $operator ?", [dateString]);
   }
 
   /// Filter by date range (equivalent to DATE(column) BETWEEN start AND end)
@@ -714,57 +714,62 @@ class QueryBuilder<T extends Model<T>> {
   ) {
     final startString = start.toIso8601String().substring(0, 10);
     final endString = end.toIso8601String().substring(0, 10);
-    return whereRaw('DATE($column) BETWEEN ? AND ?', [startString, endString]);
+    return whereRaw("DATE($column, 'localtime') BETWEEN ? AND ?", [
+      startString,
+      endString,
+    ]);
   }
 
   /// Filter by year (equivalent to strftime('%Y', column) = year)
   QueryBuilder<T> whereYear(String column, int year) {
-    return whereRaw("strftime('%Y', $column) = ?", [year.toString()]);
+    return whereRaw("strftime('%Y', $column, 'localtime') = ?", [
+      year.toString(),
+    ]);
   }
 
   /// Filter by month (equivalent to strftime('%m', column) = month)
   QueryBuilder<T> whereMonth(String column, int month) {
     final monthString = month.toString().padLeft(2, '0');
-    return whereRaw("strftime('%m', $column) = ?", [monthString]);
+    return whereRaw("strftime('%m', $column, 'localtime') = ?", [monthString]);
   }
 
   /// Filter by day (equivalent to strftime('%d', column) = day)
   QueryBuilder<T> whereDay(String column, int day) {
     final dayString = day.toString().padLeft(2, '0');
-    return whereRaw("strftime('%d', $column) = ?", [dayString]);
+    return whereRaw("strftime('%d', $column, 'localtime') = ?", [dayString]);
   }
 
   /// Group by date part (equivalent to GROUP BY DATE(column))
   QueryBuilder<T> groupByDate(String column) {
-    return groupByRaw('DATE($column)');
+    return groupByRaw("DATE($column, 'localtime')");
   }
 
   /// Group by year (equivalent to GROUP BY strftime('%Y', column))
   QueryBuilder<T> groupByYear(String column) {
-    return groupByRaw("strftime('%Y', $column)");
+    return groupByRaw("strftime('%Y', $column, 'localtime')");
   }
 
   /// Group by month (equivalent to GROUP BY strftime('%Y-%m', column))
   QueryBuilder<T> groupByMonth(String column) {
-    return groupByRaw("strftime('%Y-%m', $column)");
+    return groupByRaw("strftime('%Y-%m', $column, 'localtime')");
   }
 
   /// Select date part in results (equivalent to DATE(column) as alias)
   QueryBuilder<T> selectDate(String column, [String? alias]) {
     final aliasName = alias ?? '${column}_date';
-    return selectRaw('DATE($column) as $aliasName');
+    return selectRaw("DATE($column, 'localtime') as $aliasName");
   }
 
   /// Select year part in results
   QueryBuilder<T> selectYear(String column, [String? alias]) {
     final aliasName = alias ?? '${column}_year';
-    return selectRaw("strftime('%Y', $column) as $aliasName");
+    return selectRaw("strftime('%Y', $column, 'localtime') as $aliasName");
   }
 
   /// Select month part in results
   QueryBuilder<T> selectMonth(String column, [String? alias]) {
     final aliasName = alias ?? '${column}_month';
-    return selectRaw("strftime('%Y-%m', $column) as $aliasName");
+    return selectRaw("strftime('%Y-%m', $column, 'localtime') as $aliasName");
   }
 
   // =============================================================================
